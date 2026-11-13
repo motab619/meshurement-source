@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launch window before Flutter's first frame (Android 8 to 11; 12+ shows
+     the system splash, values-v31/styles.xml). Same look as the iOS
+     LaunchScreen: navy with the logo + wordmark centred. The image comes
+     from tool/make_splash.py. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/splash_background" />
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/launch_image" />
+    </item>
+</layer-list>

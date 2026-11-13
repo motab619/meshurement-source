@@ -1,0 +1,123 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Bluetooth LE (flutter_blue_plus declares none on purpose).
+         Android 12+: SCAN (never used to derive location) + CONNECT.
+         Android 11 and below: legacy BLUETOOTH/ADMIN plus location. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+
+    <!-- GPS for coverage points. No ACCESS_BACKGROUND_LOCATION: a recording
+         session keeps location through geolocator's foreground service
+         (GeolocatorLocationService, declared in the plugin's manifest). -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <!-- geolocator's foreground service holds a wake lock while recording
+         (gps_service.dart: enableWakeLock). -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Out-of-range / radio-lost alerts. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Map tiles and the AI backend. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+
+    <application
+        android:label="Meshurement"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <!-- Specifies an Android theme to apply to this Activity as soon as
+                 the Android process has started. This theme is visible to the user
+                 while the Flutter UI initializes. After that, this theme continues
+                 to determine the Window background behind the Flutter UI. -->
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Open .mabackup radio backups (MainActivity "openedFile").
+                 pathPattern only matches the first dot, hence the repeats
+                 for names with up to four dots before the extension.
+                 Matches only URIs whose path ends in .mabackup: Files'
+                 externalstorage documents and file managers that use real
+                 paths. Downloads (content://…/document/msf:123) and Drive
+                 URIs carry no name, so they don't match; those need a
+                 MIME filter (application/octet-stream, application/json),
+                 which would offer the app for every such file, so it waits
+                 for the Dart consumer that can say "not a backup". The
+                 in-app Import (file_picker) covers them meanwhile. No
+                 BROWSABLE: browsers never link content:/file: URIs. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:host="*" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.mabackup" />
+                <data android:pathPattern=".*\\..*\\.mabackup" />
+                <data android:pathPattern=".*\\..*\\..*\\.mabackup" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.mabackup" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.mabackup" />
+            </intent-filter>
+        </activity>
+        <!-- Don't delete the meta-data below.
+             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+    <!-- Package visibility (Android 11+):
+         PROCESS_TEXT for the Flutter engine's ProcessTextPlugin;
+         VIEW https and mailto for url_launcher (privacy/support links,
+         support email);
+         SEND for share_plus (CSV, backups, field report PNG). -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="mailto" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="*/*" />
+        </intent>
+    </queries>
+</manifest>

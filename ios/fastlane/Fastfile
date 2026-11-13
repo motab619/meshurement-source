@@ -1,0 +1,181 @@
+# Meshurement - maps LoRa mesh radio coverage.
+# Copyright (C) 2026 Andy Brunker (Plateau Nerd)
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Free software under the GNU GPL v3 or later, WITHOUT ANY WARRANTY; see LICENSE.
+
+# fastlane lanes. Run from ios/:
+#   fastlane snapshot     App screenshots (demo mode), see Snapfile
+#   fastlane beta         Build for testers (Pro unlocked) and upload to TestFlight
+#   fastlane release      Build for App Review / the App Store (real paywall)
+#                         and upload to App Store Connect
+#   fastlane bench_check  Release gate: is the newest hardware-bench report
+#                         (tool/bench) fresh, passing and for HEAD? Warns by
+#                         default; BENCH_STRICT=1 fails instead. Runs first
+#                         in `beta`. BENCH_MAX_AGE_H (48) is the age limit.
+#
+# Only `beta` passes --dart-define=TESTFLIGHT_PRO=true (lib/services/
+# test_build.dart). App Review runs builds with a sandbox receipt, so a beta
+# build submitted for review would hide the subscription from the reviewer:
+# submit only builds made by `release` for review.
+#
+# `beta` needs an App Store Connect API key. Put these in ios/fastlane/.env
+# (see .env.example; never commit the .p8 key):
+#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH
+# Both lanes also need AI_APP_TOKEN there (the AI Lambda's app token, see
+# tool/ai-analysis/README.md); without it the build makes no AI requests.
+
+require "json"
+require "open3"
+require "tmpdir"
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build for testers (every Pro feature unlocked) and upload to TestFlight"
+  lane :beta do
+    bench_gate
+    upload_build(testflight_pro: true)
+  end
+
+  desc "Release gate: the newest bench report (tool/bench) must be fresh, passing and for HEAD. Warns by default; BENCH_STRICT=1 fails the lane"
+  lane :bench_check do
+    bench_gate
+  end
+
+  # The bench tool judges its own report (`bench latest --json`: {ok,
+  # problems, summary}); this lane only prints what it says and decides
+  # between a warning (default) and a failure (BENCH_STRICT=1).
+  # docs/design/bench-rig/README.md §7.
+  private_lane :bench_gate do
+    root = File.expand_path("../..", __dir__)
+    head = `git -C #{root} rev-parse HEAD`.strip
+    max_age = ENV.fetch("BENCH_MAX_AGE_H", "48")
+    cmd = ["uv", "run", "--quiet", "bench", "latest", "--json",
+           "--max-age-h", max_age, "--commit", head]
+    result = nil
+    detail = ""
+    begin
+      out, err, _status = Open3.capture3(*cmd, chdir: File.join(root, "tool/bench"))
+      result = JSON.parse(out) if out.strip.start_with?("{")
+      detail = (out + err).strip
+    rescue Errno::ENOENT
+      detail = "uv not found (brew install uv)"
+    end
+    problems = result ? result.fetch("problems", []) : ["`bench latest` gave no JSON: #{detail}"]
+    summary = result ? result.fetch("summary", "") : ""
+    UI.message("Bench report:\n#{summary}") unless summary.empty?
+    if problems.empty?
+      UI.success("Bench gate: the latest bench report is fresh, passing and for HEAD")
+    else
+      text = "Bench gate: #{problems.join("; ")}. " \
+             "Run `cd tool/bench && uv run bench run all` on the bench first."
+      if ENV["BENCH_STRICT"] == "1"
+        UI.user_error!(text)
+      else
+        UI.important("#{text} (warning only; BENCH_STRICT=1 makes this fail)")
+      end
+    end
+  end
+
+  desc "Build for App Review and the App Store (real paywall) and upload it"
+  lane :release do
+    upload_build(testflight_pro: false)
+  end
+
+  private_lane :upload_build do |options|
+    testflight_pro = options.fetch(:testflight_pro)
+    root = File.expand_path("../..", __dir__)
+
+    # Release gates: a clean tree (so the build matches a commit), analyzer
+    # and tests green. docs/beta/ is owned by a separate workflow; ignore it.
+    dirty = `git -C #{root} status --porcelain`.lines.reject { |l| l.split(" ", 2).last.to_s.strip.start_with?("docs/beta/") }
+    UI.user_error!("Working tree is not clean; commit or stash first:\n#{dirty.join}") unless dirty.empty?
+    Dir.chdir(root) do
+      sh("flutter", "analyze")
+      sh("flutter", "test")
+    end
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: File.expand_path(ENV.fetch("ASC_KEY_PATH")),
+    )
+
+    # Each upload needs a new build number: one more than TestFlight's latest.
+    build = latest_testflight_build_number(
+      api_key: api_key,
+      app_identifier: "com.andybrunker.meshAnalyzer",
+      initial_build_number: 0,
+    ) + 1
+    UI.message("Building build number #{build}")
+
+    Dir.chdir(root) do
+      # Compile Dart and write the version/build (and the Dart defines, which
+      # Xcode's Flutter build phase reuses) into Generated.xcconfig.
+      # AI_APP_TOKEN (ios/fastlane/.env) is the AI Lambda's shared app token
+      # (tool/ai-analysis/README.md). ENV.fetch fails the lane early rather
+      # than uploading a build whose AI cards would say "unavailable".
+      args = ["flutter", "build", "ios", "--release", "--no-codesign",
+              "--build-number=#{build}",
+              "--dart-define=AI_APP_TOKEN=#{ENV.fetch("AI_APP_TOKEN")}"]
+      args << "--dart-define=TESTFLIGHT_PRO=true" if testflight_pro
+      sh(*args)
+    end
+
+    # The archive below compiles Dart again from Generated.xcconfig's
+    # DART_DEFINES (base64, comma separated). Make sure the tester unlock is
+    # there for beta and absent for anything that may go to App Review.
+    xcconfig = File.read(File.join(root, "ios/Flutter/Generated.xcconfig"))
+    encoded = xcconfig[/^DART_DEFINES=(.*)$/, 1].to_s
+    defines = encoded.split(",").map { |d| d.unpack1("m") }
+    unlocked = defines.include?("TESTFLIGHT_PRO=true")
+    UI.user_error!("TESTFLIGHT_PRO is #{unlocked ? "set" : "missing"} in Generated.xcconfig") if unlocked != testflight_pro
+    UI.message(testflight_pro ? "Tester build: Pro unlocked (do not submit for review)" : "Store build: real paywall")
+
+    # Archive + export. The API key lets Xcode create the distribution
+    # certificate and profiles itself ("cloud signing"), so no Xcode account
+    # login is needed.
+    auth = [
+      "-allowProvisioningUpdates",
+      "-authenticationKeyPath", File.expand_path(ENV.fetch("ASC_KEY_PATH")),
+      "-authenticationKeyID", ENV.fetch("ASC_KEY_ID"),
+      "-authenticationKeyIssuerID", ENV.fetch("ASC_ISSUER_ID"),
+    ].join(" ")
+    ipa = build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_options: "ExportOptions.plist",
+      output_directory: File.join(root, "build/ios/ipa"),
+      xcargs: auth,
+      clean: false,
+    )
+
+    # The Live Activity extension must carry the app's exact version and
+    # build number, otherwise App Store Connect rejects the upload.
+    Dir.mktmpdir("ipa-check") do |tmp|
+      sh("unzip", "-q", ipa, "-d", tmp)
+      app = Dir.glob(File.join(tmp, "Payload", "*.app")).first
+      UI.user_error!("No .app found in #{ipa}") if app.nil?
+      appex = Dir.glob(File.join(app, "PlugIns", "*.appex"))
+      UI.user_error!("No app extension found in #{ipa}") if appex.empty?
+      read = lambda do |bundle, key|
+        `/usr/libexec/PlistBuddy -c "Print :#{key}" "#{File.join(bundle, "Info.plist")}"`.strip
+      end
+      keys = %w[CFBundleShortVersionString CFBundleVersion]
+      want = keys.map { |k| read.call(app, k) }
+      UI.message("App version #{want[0]} (#{want[1]})")
+      appex.each do |ext|
+        got = keys.map { |k| read.call(ext, k) }
+        next if got == want
+        UI.user_error!("#{File.basename(ext)} version/build #{got.inspect} != app #{want.inspect}")
+      end
+    end
+
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: ipa,
+      skip_waiting_for_build_processing: true,
+    )
+  end
+end

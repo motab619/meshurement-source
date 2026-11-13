@@ -1,0 +1,114 @@
+<!doctype html>
+<!--
+  Meshurement website - meshurement.com.
+  Copyright (C) 2026 Andy Brunker (Plateau Nerd)
+  SPDX-License-Identifier: GPL-3.0-or-later
+  Free software under the GNU GPL v3 or later, WITHOUT ANY WARRANTY; see LICENSE.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy policy | Meshurement™</title>
+  <meta name="description" content="Privacy policy for the Meshurement™ iPhone app. Your recordings stay on your phone. No ads, no analytics, no tracking.">
+  <link rel="canonical" href="https://meshurement.com/privacy">
+  <meta name="theme-color" content="#02081e">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Meshurement™">
+  <meta property="og:title" content="Meshurement™ privacy policy">
+  <meta property="og:description" content="Your recordings stay on your phone. No ads, no analytics, no tracking.">
+  <meta property="og:url" content="https://meshurement.com/privacy">
+  <meta property="og:image" content="https://meshurement.com/img/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The Meshurement™ app icon and wordmark">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/css/site.css?v=4">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="/"><img src="/img/favicon-32.png" alt="" width="36" height="36"><span>Mesh<b>urement</b>™</span></a>
+      <nav class="nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/#pro">Pro</a>
+        <a href="/support">Support</a>
+        <a href="/privacy" aria-current="page">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="page">
+    <article class="wrap measure">
+      <p class="kicker">Privacy policy</p>
+      <h1>Meshurement™ privacy policy</h1>
+      <p class="meta">Effective 2026-11-05</p>
+      <p class="lead">Meshurement™ is an iPhone app by Plateau Nerd that maps the signal strength of your own LoRa mesh nodes. Short version: your recordings stay on your phone, and we collect nothing about you. The app goes online only for map tiles and, if you turn them on, terrain data and the AI helpers. Each is described below.</p>
+      <p>Meshurement™ was previously called Mesh Analyzer. This policy replaces the Mesh Analyzer policy and describes the same app.</p>
+
+      <h2>What we collect</h2>
+      <p>Nothing about you. The app has no account or sign-in, no analytics, no advertising and no tracking or third-party SDKs. We do not receive your location or your recordings. The one identifier the app ever sends is a random number used only to count AI requests against a daily and a monthly limit (see below). It is not linked to your name, Apple ID or device.</p>
+
+      <h2>What the app uses on your phone</h2>
+      <ul>
+        <li><strong>Location (GPS):</strong> to tag each signal measurement with where you were, draw it on the map and compute distance. If you allow it, the app keeps using location in the background (the blue indicator shows) only while a coverage session is recording, so recording continues with the phone locked.</li>
+        <li><strong>Bluetooth:</strong> to connect to your own radios (Meshtastic® radios or MeshCore companion radios) and exchange messages with them. The app does not scan for or connect to anything else.</li>
+        <li><strong>Notifications:</strong> to alert you when you have been out of range of your base node, when you are back, or when the phone loses its Bluetooth link to your radio. These are local notifications made on the phone. Nothing is sent through a push server. The same status shows in the Live Activity (Dynamic Island and lock screen).</li>
+      </ul>
+      <p>All of this happens on the device. None of it is sent to us.</p>
+
+      <h2>Where your recordings live</h2>
+      <p>Sessions, signal readings, ping results, positions and your radio settings backups are stored in a database on your phone. They leave the phone only if you choose to export or share something yourself, such as a session CSV, a KML file, a radio settings backup or the diagnostics log, and then they go wherever you send them. Exports include GPS positions, and the base location is usually your home, so share them with care. Deleting the app deletes the data.</p>
+
+      <h2>Radio channel keys</h2>
+      <p>Radio Setup makes a random encryption key for the private "MeshTest" channel. The key is stored on your phone and written to your radios. It is not sent to us or anyone else, apart from any backup or channel link you choose to share.</p>
+
+      <h2>Services the app contacts</h2>
+      <p>You can see and change each of these in the app under Settings, Privacy.</p>
+      <ul>
+        <li><strong>Map tiles (on by default):</strong> inside Southern California the map background (streets, and the optional terrain shading) comes from our own tile server on Amazon CloudFront, which keeps no logs: we do not record your IP address or which map areas you view. Elsewhere the app loads tiles from OpenStreetMap's tile servers, and like any web request that tells them your IP address and the map area you are viewing. See the <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy">OpenStreetMap Foundation privacy policy</a>. Turn map tiles off and no map background is requested. Map data &copy; OpenStreetMap contributors (ODbL). Terrain shading from USGS 3DEP and NASA SRTM (public domain).</li>
+        <li><strong>Terrain elevation from Open Topo Data (off by default):</strong> the terrain features (the line-of-sight profile and the terrain-aware coverage estimate) ask <a href="https://www.opentopodata.org">Open Topo Data</a> for the ground height at your measurement points. This sends the coordinates of those points, and so of your base, but not your name, device or any identifier. As with any web request, their server also sees your IP address. Nothing is sent until you turn on terrain elevation, and the app explains this again when you do. Elevations already looked up stay on the phone.</li>
+        <li><strong>AI helpers (off until you turn them on):</strong> the app has two AI helpers, both behind one switch. <em>Analyze</em> (Pro) sends a numbers-only summary of a comparison or test result (signal levels, counts, distances, the names you gave your antennas and radio setups, and any question you type) when you tap Analyze. <em>Plan a test</em> sends the request you type on the Ask screen, with the names of your saved setups and range settings, when you tap Next. Picking a test from the list sends nothing, and with the switch off the app reads your request on the phone. Both go to our server on Amazon Web Services (AWS Lambda) and on to Anthropic, whose Claude model writes the reply. Positions, routes, the base location, radio identifiers and keys are never sent; the app checks this before sending. To enforce a daily and a monthly limit, the app also sends a random install number (made the first time you use an AI helper) and the app version. Our server keeps only that number and how many requests it made, for up to about 34 days, and does not store what you sent or the answer. Anthropic processes the request under its <a href="https://www.anthropic.com/legal/commercial-terms">commercial terms</a> and does not train on API data.</li>
+      </ul>
+      <p>The app contacts no other servers.</p>
+
+      <h2>Apple</h2>
+      <ul>
+        <li>The optional Pro subscription is sold and processed by Apple through the App Store. We do not receive your payment details or your Apple ID. Apple tells the app only whether Pro is active.</li>
+        <li>If you install a beta through TestFlight, Apple may share crash logs and any feedback you choose to send with us, under Apple's own terms and privacy policy.</li>
+      </ul>
+
+      <h2>This website</h2>
+      <p>meshurement.com uses no cookies, analytics or third-party scripts, and we keep no visitor logs.</p>
+
+      <h2>Children</h2>
+      <p>The app is not directed at children, and we do not knowingly collect information from anyone, children included.</p>
+
+      <h2>Changes to this policy</h2>
+      <p>If this policy changes, the new version will be posted on this page with a new effective date. If we ever add data collection, we will say so here and in the app first.</p>
+
+      <h2>Contact</h2>
+      <p>Questions about privacy? Email <a href="mailto:support@meshurement.com">support@meshurement.com</a> or see the <a href="/support">support page</a>.</p>
+      <p class="meta">MeshCore is a project of its authors. Meshurement™ is not affiliated with it.</p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="made">Made by <b>Plateau Nerd</b></p>
+      <nav aria-label="Footer">
+        <a href="/support">Support</a>
+        <a href="/privacy">Privacy</a>
+        <a href="https://beta.plateaunerd.com">Beta</a>
+        <!-- TODO: the source repo is still private; it goes public (and may be renamed to meshurement) in Phase 4. Keep the link. -->
+        <a href="https://github.com/motab619/meshurement-source">Source code (GPL-3.0)</a>
+      </nav>
+      <p class="tm">Meshtastic® is a registered trademark of Meshtastic LLC. Meshurement™ is not affiliated with or endorsed by Meshtastic LLC. Meshurement™ is a trademark of Andy Brunker.</p>
+    </div>
+  </footer>
+</body>
+</html>

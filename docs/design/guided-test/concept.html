@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guided test concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=B612:ital,wght@0,400;0,700;1,400&family=B612+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --surface: #141413; --card: #1A1A19; --high: #262625;
+    --ink: #F0EFEC; --soft: #C3C2B7; --muted: #9A988F; --line: #34342F;
+    --orange: #FF7A1F; --orange-dim: #6B2A00; --cyan: #2BD9E6;
+    --ok: #3DC46E; --ok-c: #16331F; --warn: #FAB219; --warn-c: #3A2A05;
+    --danger: #E2473E; --danger-c: #3A1412; --neutral: #3A3F42;
+    --page-bg: #0d0d0c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page-bg); color: var(--ink);
+    font-family: 'B612', system-ui, sans-serif; font-size: 15px; line-height: 1.4; }
+  .mono { font-family: 'B612 Mono', ui-monospace, monospace; }
+  .wrap { display: flex; gap: 28px; padding: 28px 16px; max-width: 1100px; margin: 0 auto;
+    align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+  /* side notes */
+  .notes { flex: 1 1 320px; max-width: 420px; color: var(--soft); }
+  .notes h1 { font-size: 19px; margin: 0 0 6px; color: var(--ink); }
+  .notes p { margin: 8px 0; font-size: 14px; }
+  .notes .cap { font-family: 'B612 Mono'; color: var(--orange); letter-spacing: 1px; font-size: 12px; margin-top: 20px; }
+  .jump { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .jump button { background: var(--card); color: var(--soft); border: 1px solid var(--line); border-radius: 8px;
+    padding: 8px 10px; text-align: left; font: inherit; font-size: 13px; cursor: pointer; }
+  .jump button:hover { border-color: var(--orange); color: var(--ink); }
+  .jump button.on { border-color: var(--orange); color: var(--orange); }
+  .notes .fine { font-size: 12px; color: var(--muted); }
+  /* phone */
+  .phone { width: 390px; height: min(844px, calc(100vh - 56px)); min-height: 560px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 36px; position: relative; overflow: hidden; flex: 0 0 390px; }
+  .status { height: 48px; display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 0 28px 4px; font-size: 13px; color: var(--soft); }
+  .screen { position: absolute; top: 48px; left: 0; right: 0; bottom: 0; display: none; flex-direction: column; }
+  .screen.on { display: flex; }
+  .appbar { display: flex; align-items: center; gap: 10px; padding: 6px 12px 10px; border-bottom: 1px solid var(--line); }
+  .appbar .back { width: 36px; height: 36px; border: 0; background: none; color: var(--ink); font-size: 20px; cursor: pointer; }
+  .appbar .title { font-size: 19px; font-weight: 700; flex: 1; }
+  .appbar .small { font-size: 13px; color: var(--muted); }
+  .body { flex: 1; overflow: auto; padding: 16px; }
+  .footer { padding: 12px 16px 24px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+  .cap { font-family: 'B612 Mono'; color: var(--orange); letter-spacing: 1px; font-size: 12px; }
+  .key { height: 56px; border-radius: 8px; border: 0; background: var(--orange); color: #1A1A19; font: inherit;
+    font-weight: 700; font-size: 16px; cursor: pointer; width: 100%; }
+  .key:disabled { background: var(--neutral); color: var(--muted); cursor: default; }
+  .key.ghost { background: none; border: 1px solid var(--line); color: var(--ink); font-weight: 400; height: 44px; }
+  .key.danger { background: var(--danger); color: #fff; }
+  .row2 { display: flex; gap: 10px; }
+  .row2 .key { flex: 1; }
+  .textlink { background: none; border: 0; color: var(--cyan); font: inherit; font-size: 14px; cursor: pointer; padding: 6px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .h { font-size: 24px; font-weight: 700; line-height: 1.2; margin: 6px 0 10px; }
+  .p { color: var(--soft); margin: 0 0 10px; }
+  .fine { font-size: 12px; color: var(--muted); }
+  /* ask */
+  .field { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 14px; min-height: 92px;
+    color: var(--ink); font-size: 17px; position: relative; }
+  .field .ph { color: var(--muted); }
+  .field .caret { display: inline-block; width: 2px; height: 20px; background: var(--orange); vertical-align: -4px;
+    animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chip { border: 1px solid var(--line); border-radius: 6px; padding: 9px 12px; background: var(--card); color: var(--ink);
+    font: inherit; font-size: 14px; cursor: pointer; }
+  .chip.on { border-color: var(--orange); background: var(--orange-dim); color: var(--ink); }
+  .chip .ic { color: var(--cyan); margin-right: 6px; }
+  /* plan track */
+  .meta { display: flex; gap: 18px; margin: 4px 0 14px; }
+  .meta .v { font-family: 'B612 Mono'; font-size: 24px; font-weight: 700; }
+  .meta .l { font-family: 'B612 Mono'; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+  .track { position: relative; padding-left: 36px; }
+  .track::before { content: ""; position: absolute; left: 13px; top: 10px; bottom: 10px; width: 2px; background: var(--line); }
+  .stop { position: relative; margin-bottom: 10px; }
+  .stop .n { position: absolute; left: -36px; top: 10px; width: 28px; height: 28px; border-radius: 8px; background: var(--high);
+    border: 1px solid var(--line); color: var(--soft); font-family: 'B612 Mono'; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; }
+  .stop.lit .n { background: var(--orange); border-color: var(--orange); color: #1A1A19; }
+  .stop.done .n { background: var(--ok-c); border-color: var(--ok); color: var(--ok); }
+  .stop .card { padding: 10px 12px; }
+  .stop .t { font-weight: 700; }
+  .stop .d { color: var(--soft); font-size: 14px; }
+  .stop .who { font-family: 'B612 Mono'; font-size: 11px; letter-spacing: 1px; margin-top: 6px; display: flex; gap: 10px; }
+  .who .you { color: var(--warn); } .who .auto { color: var(--cyan); } .who .walk { color: var(--ok); }
+  .val { border-bottom: 1px dashed var(--cyan); color: var(--ink); cursor: pointer; }
+  .toggle { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .sw { width: 44px; height: 26px; border-radius: 8px; background: var(--neutral); position: relative; cursor: pointer; border: 1px solid var(--line); }
+  .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 5px; background: var(--muted); transition: .15s; }
+  .sw.on { background: var(--orange-dim); border-color: var(--orange); } .sw.on::after { left: 21px; background: var(--orange); }
+  /* run */
+  .steph { padding: 8px 16px 0; }
+  .prog { display: flex; gap: 4px; margin: 10px 0 0; }
+  .prog i { flex: 1; height: 3px; background: var(--line); border-radius: 2px; }
+  .prog i.d { background: var(--ok); } .prog i.c { background: var(--orange); }
+  .list { display: flex; flex-direction: column; gap: 0; }
+  .li { display: flex; gap: 12px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .li:last-child { border-bottom: 0; }
+  .dot { width: 12px; height: 12px; border-radius: 3px; flex: 0 0 12px; }
+  .dot.ok { background: var(--ok); } .dot.wait { background: var(--neutral); } .dot.busy { background: var(--cyan); animation: blink 1s steps(1) infinite; }
+  .dot.warn { background: var(--warn); }
+  .li .t { flex: 1; } .li .s { color: var(--muted); font-size: 13px; }
+  .li .fix { background: none; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); font: inherit; font-size: 13px; padding: 6px 10px; cursor: pointer; }
+  .big { font-size: 20px; line-height: 1.35; margin: 8px 0 14px; }
+  .big b { color: var(--orange); }
+  .compass { height: 150px; display: flex; align-items: center; justify-content: center; gap: 20px; }
+  .compass .arrow { width: 96px; height: 96px; }
+  .compass .dist { font-family: 'B612 Mono'; font-size: 40px; font-weight: 700; }
+  .compass .dl { font-family: 'B612 Mono'; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+  .hud { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+  .hud > div { flex: 1; padding: 8px 10px; border-right: 1px solid var(--line); }
+  .hud > div:last-child { border-right: 0; }
+  .hud .l { font-family: 'B612 Mono'; font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+  .hud .v { font-family: 'B612 Mono'; font-size: 18px; font-weight: 700; }
+  .hud .v.ok { color: var(--ok); } .hud .v.cy { color: var(--cyan); }
+  .band { background: var(--ok-c); color: var(--ok); border-radius: 8px; padding: 8px 12px; font-size: 14px; display: flex; justify-content: space-between; margin-bottom: 10px; }
+  .band.warn { background: var(--warn-c); color: var(--warn); }
+  .map { background: #1d1d1b; border: 1px solid var(--line); border-radius: 12px; height: 300px; position: relative; overflow: hidden; }
+  .map svg { width: 100%; height: 100%; }
+  .legend { position: absolute; left: 10px; bottom: 10px; background: rgba(20,20,19,.85); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--soft); display: flex; gap: 12px; }
+  .legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 5px; }
+  .pause { display: flex; justify-content: space-between; }
+  /* sheet */
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 1px solid var(--line);
+    border-radius: 16px 16px 0 0; padding: 10px 16px 24px; transform: translateY(105%); transition: .25s; z-index: 5; max-height: 92%; overflow: auto; }
+  .sheet.on { transform: none; }
+  .scrim { position: absolute; inset: 0; background: rgba(0,0,0,.5); display: none; z-index: 4; }
+  .scrim.on { display: block; }
+  .handle { width: 36px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 12px; }
+  .sheet h3 { margin: 4px 0 8px; font-size: 19px; }
+  .sheet .p { font-size: 14px; }
+  .sheet .lbl { font-weight: 700; color: var(--ink); }
+  .check { display: flex; gap: 10px; align-items: center; margin: 14px 0; cursor: pointer; }
+  .box { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--muted); display: flex; align-items: center; justify-content: center; color: #1A1A19; font-weight: 700; }
+  .check.on .box { background: var(--orange); border-color: var(--orange); }
+  .dist-pill { display: inline-block; font-family: 'B612 Mono'; background: var(--high); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+  /* result */
+  .verdict { border-left: 3px solid var(--orange); padding-left: 12px; margin: 6px 0 16px; }
+  .verdict .h { font-size: 21px; margin: 0 0 6px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-family: 'B612 Mono'; font-size: 11px; letter-spacing: 1px; color: var(--muted); font-weight: 400; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  td { padding: 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.num { font-family: "B612 Mono"; font-weight: 700; white-space: nowrap; }
+  table { table-layout: fixed; }
+  th:first-child, td:first-child { width: 31%; padding-right: 6px; }
+  td .m { font-family: "B612 Mono"; font-size: 11px; color: var(--muted); font-weight: 400; display: block; white-space: normal; line-height: 1.3; }
+  tr.win td:first-child { color: var(--orange); font-weight: 700; }
+  .next { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-top: 14px; }
+  .next .cap { margin-bottom: 4px; }
+  .ai { margin-top: 14px; border: 1px dashed var(--line); border-radius: 12px; padding: 12px 14px; color: var(--soft); font-size: 14px; }
+  .bars { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 4px; }
+  .bar { display: grid; grid-template-columns: 110px 1fr 64px; gap: 8px; align-items: center; font-size: 13px; }
+  .bar .b { height: 10px; background: var(--neutral); border-radius: 3px; position: relative; overflow: hidden; }
+  .bar .b i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--cyan); }
+  .bar .b i.o { background: var(--orange); }
+  .bar .n { font-family: 'B612 Mono'; font-weight: 700; text-align: right; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="phone">
+    <div class="status"><span class="mono">9:41</span><span>⦿ ⌇ ▮▮▮</span></div>
+
+    <!-- ASK -->
+    <section class="screen" id="s-ask">
+      <div class="appbar"><button class="back">‹</button><div class="title">Guided test</div></div>
+      <div class="body">
+        <div class="cap">WHAT DO YOU WANT TO FIND OUT?</div>
+        <div class="h" style="font-size:21px">Say it in your own words, or pick one.</div>
+        <div class="field" id="ask-field"><span class="ph">e.g. which of my two antennas gets further up the hill</span></div>
+        <div class="chips" id="chips"></div>
+        <p class="fine" style="margin-top:16px">The app builds the plan itself. If you type, what you wrote is sent to an AI helper to work out which test you mean. No positions, radio ids or keys are ever sent.</p>
+      </div>
+      <div class="footer"><button class="key" id="ask-next">Next</button></div>
+    </section>
+
+    <!-- PLAN -->
+    <section class="screen" id="s-plan">
+      <div class="appbar"><button class="back" data-go="s-ask">‹</button><div class="title" id="plan-title">Your plan</div></div>
+      <div class="body">
+        <div class="meta">
+          <div><div class="v" id="plan-min">38</div><div class="l">MINUTES</div></div>
+          <div><div class="v" id="plan-steps">7</div><div class="l">STEPS</div></div>
+          <div><div class="v" id="plan-walks">2</div><div class="l">WALKS</div></div>
+        </div>
+        <p class="p" id="plan-why"></p>
+        <div class="track" id="track"></div>
+        <div class="card" style="margin-top:6px">
+          <div class="toggle"><div><div><b>Second pass, other order</b></div><div class="fine">+12 min · makes the result trustworthy</div></div><div class="sw" id="repeat"></div></div>
+        </div>
+        <p class="fine" id="plan-note" style="margin-top:12px"></p>
+      </div>
+      <div class="footer"><button class="key" data-go="run">Start</button></div>
+    </section>
+
+    <!-- RUN -->
+    <section class="screen" id="s-run">
+      <div class="appbar"><button class="back" data-go="s-plan">‹</button><div class="title" id="run-plan-title">Antenna test</div><span class="small" id="run-clock">12:04</span></div>
+      <div class="steph"><div class="cap" id="run-cap">STEP 1 OF 7</div><div class="prog" id="run-prog"></div></div>
+      <div class="body" id="run-body"></div>
+      <div class="footer" id="run-footer"></div>
+      <div class="scrim" id="scrim"></div>
+      <div class="sheet" id="risk">
+        <div class="handle"></div>
+        <h3>Changing the base from here</h3>
+        <p class="p">The app will tell the base radio to switch to <b id="risk-preset">Long Fast</b>, then switch your radio to match. The base restarts to do it.</p>
+        <p class="p"><span class="lbl">What can go wrong:</span> if the base restarts on a setting your radio can't reach from here, you'll have to walk to the base and fix it in Radio Setup. The base is <span class="dist-pill">38 m</span> away right now.</p>
+        <p class="p"><span class="lbl">What the app does to keep you safe:</span> checks the base's settings are saved · changes the base first and your radio second · listens for the base for two minutes on the new setting · if the base stays silent, puts your radio back and stops with directions to the base.</p>
+        <div class="check" id="risk-check"><div class="box">✓</div><div>I can get to the base if I need to</div></div>
+        <button class="key" id="risk-go" disabled>Change base from here</button>
+        <button class="key ghost" style="margin-top:10px" id="risk-walk">I'll walk to it instead</button>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section class="screen" id="s-result">
+      <div class="appbar"><button class="back" data-go="s-plan">‹</button><div class="title">What you found out</div></div>
+      <div class="body" id="result-body"></div>
+      <div class="footer"><div class="row2"><button class="key ghost">Share</button><button class="key ghost">Open on map</button></div><button class="key" data-go="s-ask">Done</button></div>
+    </section>
+  </div>
+
+  <div class="notes">
+    <h1>Guided test, clickable concept</h1>
+    <p>Four screens: <b>Ask → Plan → Run → Result</b>. Pick a chip on the first screen; the plan and every step change with it. Every number is a sample. Design notes in <span class="mono">README.md</span> beside this file.</p>
+    <div class="cap">JUMP TO</div>
+    <div class="jump" id="jump">
+      <button data-j="ask">1 · Ask</button>
+      <button data-j="plan">2 · Plan</button>
+      <button data-j="run0">3 · Run: checking your setup</button>
+      <button data-j="runSwap">3 · Run: a step you do</button>
+      <button data-j="runGo">3 · Run: go to the start</button>
+      <button data-j="runWalk">3 · Run: the walk</button>
+      <button data-j="runChange">3 · Run: radios change (range settings)</button>
+      <button data-j="runRisk">3 · Run: the risk sheet</button>
+      <button data-j="result">4 · Result</button>
+    </div>
+    <div class="cap">RULES ON SHOW</div>
+    <p>One job per screen, one 56 px key. Mono orange captions, B612 everywhere, hairlines not shadows. The app never asks what it can work out: map, session names, rigs, ping interval, beacon. Fairness built in: ghost route, route match, same start point, base untouched between variants.</p>
+    <p>Remote base changes exist only on Meshtastic, only after the base was given the mobile radio's key over Bluetooth in Radio Setup, and only after the risk sheet. On MeshCore the same step says "walk to the base; the app connects over Bluetooth".</p>
+    <p class="fine">Result copy follows the never-null rule: what was proved, one number with margin per side, one next step.</p>
+  </div>
+</div>
+
+<script>
+const TEMPLATES = {
+  antennas: {
+    chip: 'Compare antennas', ic: '⟟',
+    title: 'Antenna test', why: 'Two walks on the same route, one per antenna, with the base untouched. The app records each walk and compares them cell by cell.',
+    variants: ['Stock whip', '5.8 dBi fiberglass'], min: 38, walks: 2,
+    note: 'Nothing on the radios changes. You swap the antenna; the app does the rest.',
+    steps: [
+      { k: 'preflight', t: 'Checking your setup', d: 'Radios, channel, base location, GPS', who: 'auto' },
+      { k: 'swap', t: 'Put the Stock whip on', d: 'On the mobile radio, hand-tight, upright', who: 'you', v: 0 },
+      { k: 'goto', t: 'Go to the start point', d: 'Next to the base this first time', who: 'you' },
+      { k: 'walk', t: 'Walk the route', d: '≈12 min · the app records', who: 'walk', v: 0 },
+      { k: 'swap', t: 'Put the 5.8 dBi fiberglass on', d: 'Same radio, same spot', who: 'you', v: 1 },
+      { k: 'walk', t: 'Walk the same route', d: 'Follow the ghost line · route match shown live', who: 'walk', v: 1 },
+      { k: 'analyze', t: 'Compare', d: 'Cell by cell, farthest reach, pings answered', who: 'auto' },
+    ],
+    result: {
+      h: '5.8 dBi fiberglass reached 190 m further and held the link where the whip lost it.',
+      rows: [
+        ['Stock whip', '610 m', 'farthest ping', '−2.1 dB', '41 shared cells', '38 / 52', '73 % answered'],
+        ['5.8 dBi fiberglass', '800 m', 'farthest ping', '+2.1 dB', '78 % of cells better', '47 / 51', '92 % answered'],
+      ], win: 1,
+      next: 'Both reached the gate at 610 m. To see how much further the fiberglass goes, walk on past the gate next time; the base stayed quiet after 800 m.',
+      rescue: 'Walk 2 started 9 minutes later than walk 1 and the base did not move. Route match 91 %.',
+    }
+  },
+  presets: {
+    chip: 'Compare range settings', ic: '≋',
+    title: 'Range setting test', why: 'The radios switch between settings and you walk the same route for each. The base is changed from where you stand, then your radio, then the app checks the base is heard before you go.',
+    variants: ['Medium Fast', 'Long Fast'], min: 46, walks: 2,
+    note: 'The base is changed without touching it (Meshtastic, remote changes enabled in Radio Setup). The app saves its settings first and explains the risk before the first change.',
+    steps: [
+      { k: 'preflight', t: 'Checking your setup', d: 'Radios, channel, remote changes allowed, base backup, GPS', who: 'auto' },
+      { k: 'goto', t: 'Stand within sight of the base', d: 'Radio changes happen where the link is strongest', who: 'you' },
+      { k: 'change', t: 'Switch both radios to Medium Fast', d: 'Base first, then yours · checks the base is heard', who: 'auto', v: 0 },
+      { k: 'walk', t: 'Walk the route', d: '≈12 min · the app records', who: 'walk', v: 0 },
+      { k: 'goto', t: 'Back to the base', d: 'Same spot as before', who: 'you' },
+      { k: 'change', t: 'Switch both radios to Long Fast', d: 'Base first, then yours · checks the base is heard', who: 'auto', v: 1 },
+      { k: 'walk', t: 'Walk the same route', d: 'Follow the ghost line', who: 'walk', v: 1 },
+      { k: 'change', t: 'Put the radios back on Medium Fast', d: 'Your everyday setting', who: 'auto', v: 0 },
+      { k: 'analyze', t: 'Compare', d: 'Reach, margin, airtime per ping', who: 'auto' },
+    ],
+    result: {
+      h: 'Both settings held the whole route. Medium Fast did it with 0.9 s less airtime per ping.',
+      rows: [
+        ['Medium Fast', '800 m', 'end of route', '+6.5 dB', 'margin above floor', '0.46 s', 'airtime per ping'],
+        ['Long Fast', '800 m', 'end of route', '+9.0 dB', 'margin above floor', '1.37 s', 'airtime per ping'],
+      ], win: 0,
+      next: 'Nothing on this route needs Long Fast. Keep Medium Fast and try Short Fast on a day when the route is extended past the gate: the margin suggests it will hold to about 500 m.',
+      rescue: 'A second base was heard on the channel for 3 minutes of walk 2; its 5 answers were set aside.',
+    }
+  },
+  radios: { chip: 'Compare two radios', ic: '▣', alias: 'antennas' },
+  power: { chip: 'Compare TX power', ic: '▲', alias: 'presets' },
+  reach: { chip: 'How far does it reach?', ic: '◎', alias: 'antennas' },
+};
+
+let tpl = 'antennas', stepIdx = 0, repeat = false;
+const $ = (s) => document.querySelector(s);
+const show = (id) => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('on')); $('#' + id).classList.add('on'); };
+const T = () => TEMPLATES[TEMPLATES[tpl].alias || tpl];
+
+// Ask
+const chips = $('#chips');
+Object.entries(TEMPLATES).forEach(([k, v]) => {
+  const b = document.createElement('button'); b.className = 'chip' + (k === tpl ? ' on' : '');
+  b.innerHTML = `<span class="ic">${v.ic}</span>${v.chip}`;
+  b.onclick = () => { tpl = k; document.querySelectorAll('.chip').forEach(c => c.classList.remove('on')); b.classList.add('on');
+    $('#ask-field').innerHTML = `${v.chip.replace('Compare', 'I want to compare').replace('How far does it reach?', 'How far does my setup reach?')}<span class="caret"></span>`; };
+  chips.appendChild(b);
+});
+$('#ask-next').onclick = () => { buildPlan(); show('s-plan'); };
+
+// Plan
+function buildPlan() {
+  const t = T();
+  $('#plan-title').textContent = t.title; $('#run-plan-title').textContent = t.title;
+  $('#plan-why').textContent = t.why; $('#plan-note').textContent = t.note;
+  $('#plan-min').textContent = t.min + (repeat ? 12 : 0); $('#plan-steps').textContent = t.steps.length; $('#plan-walks').textContent = t.walks * (repeat ? 2 : 1);
+  const tr = $('#track'); tr.innerHTML = '';
+  t.steps.forEach((s, i) => {
+    const who = { you: '<span class="you">● YOU</span>', auto: '<span class="auto">● AUTOMATIC</span>', walk: '<span class="walk">● WALK · RECORDED</span>' }[s.who];
+    let d = s.d;
+    if (s.k === 'swap' || s.k === 'change') d = d.replace(t.variants[s.v], `<span class="val">${t.variants[s.v]}</span>`);
+    let title = s.t; t.variants.forEach(v => { title = title.replace(v, `<span class="val">${v}</span>`); });
+    if (s.k === 'walk') d = d.replace('≈12 min', '≈<span class="val">12 min</span>');
+    tr.insertAdjacentHTML('beforeend', `<div class="stop ${i === 0 ? 'lit' : ''}"><div class="n">${i + 1}</div><div class="card"><div class="t">${title}</div><div class="d">${d}</div><div class="who">${who}</div></div></div>`);
+  });
+}
+$('#repeat').onclick = () => { repeat = !repeat; $('#repeat').classList.toggle('on', repeat); buildPlan(); };
+
+// Run
+function runStep(i, opts = {}) {
+  const t = T(); stepIdx = Math.max(0, Math.min(i, t.steps.length - 1)); const s = t.steps[stepIdx];
+  show('s-run'); closeRisk();
+  $('#run-cap').textContent = `STEP ${stepIdx + 1} OF ${t.steps.length}`;
+  $('#run-prog').innerHTML = t.steps.map((_, j) => `<i class="${j < stepIdx ? 'd' : j === stepIdx ? 'c' : ''}"></i>`).join('');
+  const body = $('#run-body'), foot = $('#run-footer');
+  const nextBtn = (label, extra = '') => `<button class="key" id="next">${label}</button>${extra}<div class="pause"><button class="textlink">Pause</button><button class="textlink">I'm stuck</button></div>`;
+  const v = s.v != null ? t.variants[s.v] : '';
+  if (s.k === 'preflight') {
+    const rows = tpl === 'presets' || tpl === 'power'
+      ? [['ok', 'Mobile radio connected', 'MeshTest Mobile · T1000-E'], ['ok', 'Base radio known', 'MeshTest Base · Heltec V3 · !a3f2'], ['ok', 'Both on MeshTest, same setting', 'Medium Fast · slot 20'], ['ok', 'Base settings saved', 'original + today 11:52'], ['warn', 'Remote changes', 'Not enabled on the base', 'Enable at the base'], ['ok', 'Base location', '38 m from here'], ['ok', 'GPS', '±4 m']]
+      : [['ok', 'Mobile radio connected', 'MeshTest Mobile · T1000-E'], ['ok', 'Base radio known', 'MeshTest Base · Heltec V3 · !a3f2'], ['ok', 'Both on MeshTest, same setting', 'Medium Fast · slot 20'], ['ok', 'Base beacon on', 'telemetry · every 60 s'], ['ok', 'Base location', '38 m from here'], ['busy', 'GPS', 'getting a fix…']];
+    body.innerHTML = `<div class="h">Checking your setup</div><div class="card"><div class="list">${rows.map(r => `<div class="li"><div class="dot ${r[0]}"></div><div><div class="t">${r[1]}</div><div class="s">${r[2]}</div></div>${r[3] ? `<button class="fix">${r[3]}</button>` : ''}</div>`).join('')}</div></div>
+      ${rows.some(r => r[0] === 'warn') ? '<p class="fine" style="margin-top:12px">Remote changes need one Bluetooth connection to the base: the app gives it your mobile radio\'s key, then it can be changed from a distance. Or let the plan walk you to the base for each change.</p>' : '<p class="fine" style="margin-top:12px">Nothing to do here; the next step starts when every row is green.</p>'}`;
+    foot.innerHTML = nextBtn(rows.some(r => r[0] === 'warn') ? 'Walk to the base for changes instead' : 'Continue');
+  } else if (s.k === 'swap') {
+    body.innerHTML = `<div class="h">Put the <b style="color:var(--orange)">${v}</b> on</div><p class="big">On the <b>mobile radio</b> (the one in your hand). Screw it on hand-tight, then stand it upright.</p>
+      <div class="card"><div class="cap">THIS WALK WILL BE SAVED AS</div><div style="margin-top:6px">${t.title} · ${s.v + 1} of ${t.variants.length} · <span class="val">${v}</span></div><div class="fine" style="margin-top:4px">Rig profile "${v}" · mobile · ${s.v ? '5.8 dBi, 0.5 m RG-58' : '2 dBi, no cable'}</div></div>
+      <p class="fine" style="margin-top:12px">Tap the name to rename it or add the gain. The app fills in what it knows.</p>`;
+    foot.innerHTML = nextBtn("Done, it's on");
+  } else if (s.k === 'goto') {
+    const nearBase = s.t.includes('base');
+    body.innerHTML = `<div class="h">${s.t}</div><p class="big">${nearBase ? 'Radio changes happen where the link is strongest, so a problem is cheapest to fix.' : 'Same start point every time makes the walks comparable.'}</p>
+      <div class="card"><div class="compass"><svg class="arrow" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="#34342F" stroke-width="2"/><polygon points="50,10 64,58 50,48 36,58" fill="#FF7A1F" transform="rotate(32 50 50)"/></svg><div><div class="dist">${nearBase ? '38' : '112'}<span style="font-size:18px"> m</span></div><div class="dl">${nearBase ? 'TO THE BASE' : 'TO THE START PIN'}</div></div></div></div>
+      <p class="fine" style="margin-top:12px">The key lights up within 15 m. Tap it anyway if you know you're there.</p>`;
+    foot.innerHTML = nextBtn("I'm here");
+  } else if (s.k === 'walk') {
+    const second = s.v === 1;
+    body.innerHTML = `<div class="band">● Base heard · 4 s ago<span class="mono">SNR +7.5</span></div>
+      <div class="hud"><div><div class="l">ELAPSED</div><div class="v">${second ? '07:40' : '03:12'}</div></div><div><div class="l">PLANNED</div><div class="v">12:00</div></div><div><div class="l">ROUTE MATCH</div><div class="v cy">${second ? '72 %' : '—'}</div></div><div><div class="l">PINGS</div><div class="v ok">${second ? '27/29' : '11/12'}</div></div></div>
+      <div class="map"><svg viewBox="0 0 358 300">
+        <defs><pattern id="g" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#262625" stroke-width="1"/></pattern></defs>
+        <rect width="358" height="300" fill="url(#g)"/>
+        ${second ? '<path d="M40 250 C 90 230, 110 170, 150 150 S 230 110, 300 60" fill="none" stroke="#2BD9E6" stroke-width="4" stroke-dasharray="8 7" opacity=".7"/>' : ''}
+        <path d="${second ? 'M40 250 C 88 232, 112 176, 148 156 S 205 125, 236 108' : 'M40 250 C 70 240, 90 210, 110 190'}" fill="none" stroke="#F0EFEC" stroke-width="3"/>
+        ${[[52,247],[66,241],[80,232],[95,220],[108,196],[122,180],[138,164],[152,153],[170,142],[188,133],[206,124],[224,114]].slice(0, second ? 12 : 5).map(([x,y],i) => `<circle cx="${x}" cy="${y}" r="5" fill="${i < 9 ? '#27AE60' : '#F1C40F'}" stroke="#141413" stroke-width="1.5"/>`).join('')}
+        <g transform="translate(40 250)"><rect x="-8" y="-8" width="16" height="16" fill="#FF7A1F" transform="rotate(45)"/><text x="12" y="-6" fill="#F0EFEC" font-family="B612 Mono" font-size="11">BASE</text></g>
+        <g transform="translate(${second ? 236 : 110} ${second ? 108 : 190})"><circle r="9" fill="#2BD9E6" opacity=".25"/><circle r="5" fill="#2BD9E6"/></g>
+      </svg><div class="legend"><span><i style="background:#F0EFEC"></i>this walk</span>${second ? '<span><i style="background:#2BD9E6"></i>walk 1 (follow it)</span>' : ''}</div></div>
+      <p class="fine" style="margin-top:10px">${second ? 'Follow the dashed line. "Done walking" lights at 80 % route match.' : 'Walk where you want coverage checked. The app remembers this route for the next walk.'}</p>`;
+    foot.innerHTML = `<button class="key" id="next" ${second ? 'disabled' : ''}>Done walking</button><div class="pause"><button class="textlink">Pause</button><button class="textlink" id="force">${second ? 'Finish anyway' : "I'm stuck"}</button></div>`;
+    if (second) $('#force').onclick = () => { $('#next').disabled = false; $('#force').textContent = 'Route match 80 % reached'; };
+  } else if (s.k === 'change') {
+    const phase = opts.phase || 'ask';
+    const rows = [['Saving the base\'s settings', 'backup · 11:58'], ['Base: switching to ' + v, 'from here, over the mesh'], ['Letting the base restart', '20 s'], ['Your radio: switching to ' + v, 'over Bluetooth, restarts'], ['Listening for the base', 'up to 2 min']];
+    const state = phase === 'ask' ? ['wait','wait','wait','wait','wait'] : phase === 'busy' ? ['ok','ok','ok','busy','wait'] : ['ok','ok','ok','ok','ok'];
+    body.innerHTML = `<div class="h">Switch both radios to <b style="color:var(--orange)">${v}</b></div><p class="big">${phase === 'done' ? 'Both radios are on <b>' + v + '</b> and the base answered in 6 s.' : 'The base first, then yours. Stay here until the base is heard again.'}</p>
+      <div class="card"><div class="list">${rows.map((r, i) => `<div class="li"><div class="dot ${state[i]}"></div><div><div class="t">${r[0]}</div><div class="s">${r[1]}</div></div></div>`).join('')}</div></div>
+      <p class="fine" style="margin-top:12px">${phase === 'ask' ? 'Changing the base from here has a risk. The app explains it before it starts. <button class="textlink" id="risk-open" style="padding:0">What can go wrong?</button>' : 'If the base stays silent, your radio goes back to its old setting and the plan pauses with directions to the base.'}</p>`;
+    if (phase === 'ask') { foot.innerHTML = `<button class="key" id="next">Change the radios</button><div class="pause"><button class="textlink">Pause</button><button class="textlink">I'm stuck</button></div>`; $('#next').onclick = openRisk; $('#risk-open').onclick = openRisk; return; }
+    if (phase === 'busy') { foot.innerHTML = `<button class="key" disabled>Working…</button><div class="pause"><button class="textlink">Pause</button><button class="textlink">I'm stuck</button></div>`; setTimeout(() => runStep(stepIdx, { phase: 'done' }), 1600); return; }
+    foot.innerHTML = nextBtn('Continue');
+  } else if (s.k === 'analyze') {
+    body.innerHTML = `<div class="h">Comparing</div><p class="big">Cell by cell on the shared route, farthest reach, pings answered${tpl === 'presets' ? ', airtime per ping' : ''}.</p><div class="card"><div class="list"><div class="li"><div class="dot ok"></div><div class="t">${t.variants[0]} · 52 pings · 610 m</div></div><div class="li"><div class="dot ok"></div><div class="t">${t.variants[1]} · 51 pings · 800 m</div></div><div class="li"><div class="dot busy"></div><div class="t">41 shared cells…</div></div></div></div>`;
+    foot.innerHTML = `<button class="key" id="next">See the result</button>`;
+  }
+  const n = $('#next'); if (n) n.onclick = () => { if (stepIdx === t.steps.length - 1) { buildResult(); show('s-result'); } else runStep(stepIdx + 1); };
+}
+function openRisk() { $('#risk-preset').textContent = T().variants[T().steps[stepIdx].v]; $('#risk').classList.add('on'); $('#scrim').classList.add('on'); }
+function closeRisk() { $('#risk').classList.remove('on'); $('#scrim').classList.remove('on'); $('#risk-check').classList.remove('on'); $('#risk-go').disabled = true; }
+$('#scrim').onclick = closeRisk;
+$('#risk-check').onclick = () => { const on = $('#risk-check').classList.toggle('on'); $('#risk-go').disabled = !on; };
+$('#risk-go').onclick = () => runStep(stepIdx, { phase: 'busy' });
+$('#risk-walk').onclick = () => { closeRisk(); runStep(stepIdx, { phase: 'busy' }); };
+
+// Result
+function buildResult() {
+  const t = T(), r = t.result;
+  $('#result-body').innerHTML = `<div class="cap">${t.title.toUpperCase()} · 2 WALKS · 24 MIN</div>
+    <div class="verdict"><div class="h">${r.h}</div><div class="fine">Same route both times (match 91 %), base untouched.</div></div>
+    <table><tr><th>SETUP</th><th>REACH</th><th>MARGIN</th><th>${tpl === 'presets' ? 'AIRTIME' : 'PINGS'}</th></tr>
+    ${r.rows.map((row, i) => `<tr class="${i === r.win ? 'win' : ''}"><td>${row[0]}</td><td class="num">${row[1]}<span class="m">${row[2]}</span></td><td class="num">${row[3]}<span class="m">${row[4]}</span></td><td class="num">${row[5]}<span class="m">${row[6]}</span></td></tr>`).join('')}</table>
+    <div class="bars"><div class="cap" style="margin-top:8px">WHERE EACH ONE LED · SHARED CELLS</div>
+      <div class="bar"><span>${r.rows[0][0]}</span><div class="b"><i class="o" style="width:${tpl === 'presets' ? 100 : 22}%"></i></div><span class="n">${tpl === 'presets' ? 'tie' : '22 %'}</span></div>
+      <div class="bar"><span>${r.rows[1][0]}</span><div class="b"><i style="width:${tpl === 'presets' ? 100 : 78}%"></i></div><span class="n">${tpl === 'presets' ? 'tie' : '78 %'}</span></div></div>
+    <div class="next"><div class="cap">NEXT STEP</div>${r.next}</div>
+    <div class="card" style="margin-top:14px"><div class="cap">DATA NOTE</div><div style="margin-top:4px;font-size:14px;color:var(--soft)">${r.rescue}</div></div>
+    <div class="ai"><div class="cap" style="color:var(--cyan)">READING IT · AI</div><div style="margin-top:4px">A plain-English read of this result, written by Claude from the numbers above (never positions). <button class="textlink" style="padding:0">Send summary &amp; read it</button></div></div>`;
+}
+
+// nav
+document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { const g = b.dataset.go; if (g === 'run') runStep(0); else show(g); });
+document.querySelectorAll('#jump button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#jump button').forEach(x => x.classList.remove('on')); b.classList.add('on');
+  const j = b.dataset.j; const needPresets = (j === 'runChange' || j === 'runRisk');
+  if (needPresets && !(tpl === 'presets' || tpl === 'power')) { tpl = 'presets'; document.querySelectorAll('.chip').forEach((c, i) => c.classList.toggle('on', Object.keys(TEMPLATES)[i] === 'presets')); }
+  if (j !== 'ask') buildPlan();
+  const steps = T().steps, find = (k, nth = 0) => steps.map((s, i) => s.k === k ? i : -1).filter(i => i >= 0)[nth] ?? 0;
+  ({ ask: () => show('s-ask'), plan: () => show('s-plan'), run0: () => runStep(0), runSwap: () => runStep(find(tpl === 'presets' ? 'goto' : 'swap')),
+     runGo: () => runStep(find('goto')), runWalk: () => runStep(find('walk', 1)), runChange: () => runStep(find('change'), { phase: 'done' }),
+     runRisk: () => { runStep(find('change')); openRisk(); }, result: () => { buildResult(); show('s-result'); } })[j]();
+});
+setInterval(() => { const d = new Date(); $('#run-clock').textContent = d.toTimeString().slice(0, 5); }, 1000);
+show('s-ask');
+</script>
+</body>
+</html>

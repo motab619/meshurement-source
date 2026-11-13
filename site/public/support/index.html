@@ -1,0 +1,148 @@
+<!doctype html>
+<!--
+  Meshurement website - meshurement.com.
+  Copyright (C) 2026 Andy Brunker (Plateau Nerd)
+  SPDX-License-Identifier: GPL-3.0-or-later
+  Free software under the GNU GPL v3 or later, WITHOUT ANY WARRANTY; see LICENSE.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Support | Meshurement™</title>
+  <meta name="description" content="Help for the Meshurement™ iPhone app: what you need, which nodes work, restoring a radio's settings and purchases, and how to reach us.">
+  <link rel="canonical" href="https://meshurement.com/support">
+  <meta name="theme-color" content="#02081e">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Meshurement™">
+  <meta property="og:title" content="Meshurement™ support">
+  <meta property="og:description" content="Help for the Meshurement™ iPhone app, and how to reach us.">
+  <meta property="og:url" content="https://meshurement.com/support">
+  <meta property="og:image" content="https://meshurement.com/img/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The Meshurement™ app icon and wordmark">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/css/site.css?v=4">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="/"><img src="/img/favicon-32.png" alt="" width="36" height="36"><span>Mesh<b>urement</b>™</span></a>
+      <nav class="nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/#pro">Pro</a>
+        <a href="/support" aria-current="page">Support</a>
+        <a href="/privacy">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="page">
+    <article class="wrap measure">
+      <p class="kicker">Support</p>
+      <h1>Meshurement™ support</h1>
+      <p class="lead">Meshurement™ measures how far your LoRa mesh nodes really reach. Leave one node at home as the base, take the other with you, connected to your iPhone over Bluetooth, and the app records signal strength with your GPS position and draws it on a map.</p>
+
+      <div class="contact-box">
+        <p>Questions, bugs or ideas? Email us:</p>
+        <p><a href="mailto:support@meshurement.com">support@meshurement.com</a></p>
+        <p class="meta">Please include what you were doing, what happened, your iPhone and iOS version, and your radio models and firmware.</p>
+      </div>
+
+      <h2>Questions</h2>
+      <dl class="faq">
+        <dt>What do I need?</dt>
+        <dd>
+          <p>An iPhone and two LoRa mesh nodes of the same kind (Bluetooth radios like a Heltec V3 or a T1000-E): one stays at the base and one goes with you. One node is not enough, because the app measures the link between the two.</p>
+          <p>Allow Bluetooth and location for the app. iOS asks for Bluetooth the first time you connect a radio, and for location and notifications when you start your first session.</p>
+        </dd>
+
+        <dt>Which nodes work?</dt>
+        <dd>
+          <p>Meshtastic® nodes (firmware 2.5 or newer) and MeshCore companion nodes over Bluetooth. Both nodes must run the same kind of firmware. Both kinds work in the free app; you don't need Pro for either.</p>
+        </dd>
+
+        <dt>What's different between Meshtastic® and MeshCore nodes?</dt>
+        <dd>
+          <p>Most of the app works the same with both: maps, sessions, out-of-range alerts, backups, guided tests and the Field Report. Both are free. The differences come from how each firmware works.</p>
+          <p><strong>Checking the link.</strong> With Meshtastic®, the app sends the base a private message and the base answers, so you see how well your node hears the base. With MeshCore, the app sends a link check (a trace) that comes back with the signal in both directions, so you also see how well the base hears you.</p>
+          <p><strong>The base beacon.</strong> A Meshtastic® base sends a beacon on its own every so often, and the app notices the ones it missed. A MeshCore base sends nothing on its own: your node checks on the base at the beacon interval instead, and nothing on the base is changed for it.</p>
+          <p><strong>Node Setup.</strong> Meshtastic® nodes restart after Node Setup and swap security keys. MeshCore nodes don't restart and need no key swap, but the base has to sit on one of the frequencies MeshCore allows for it (433.000, 869.495 or 918.000 MHz); the app fills in the right one for your band.</p>
+          <p><strong>Range settings.</strong> Meshtastic® nodes use its named presets (Long Fast, Medium Fast and so on). MeshCore nodes use a list of range settings taken from the MeshCore community presets, fastest first.</p>
+          <p><strong>Changing the base from a distance.</strong> Only Meshtastic® nodes can be changed over the mesh (Change the base from here, a Pro feature). MeshCore companion nodes can't be changed remotely, so you walk to the base and change it over Bluetooth.</p>
+        </dd>
+
+        <dt>What changed with Meshtastic® firmware 2.8?</dt>
+        <dd>
+          <p><strong>No more Range Test.</strong> Firmware 2.8 leaves out the Range Test module (2.7.26 already lacks it on classic ESP32 boards). Older firmware uses Range Test as the base beacon; on 2.8 the base sends its device telemetry as the beacon instead. Node Setup picks the right one for your firmware, so you don't have to.</p>
+          <p><strong>A slower beacon.</strong> A telemetry beacon goes out at most once a minute, because that is how often the firmware's telemetry runs. Range Test could go faster. The app's pings fill in between beacons either way.</p>
+          <p><strong>After you upgrade a node to 2.8.</strong> The upgrade gives the node a new node number, switches its telemetry off, and on ESP32 boards (like the Heltec V3) clears its Bluetooth pairing. So after upgrading: in iOS Settings, Bluetooth, tap ⓘ next to the node and Forget This Device, connect it again, and run Node Setup on both nodes again. Node Setup turns telemetry back on and teaches the app the new numbers. Skip 2.8.0, which was withdrawn; use 2.8.1 or newer.</p>
+          <p><strong>Newer range settings.</strong> 2.8 adds Medium Turbo, which the app offers on nodes running 2.8 or newer. Older firmware would quietly run it as Long Fast, so the app doesn't offer it there.</p>
+          <p><strong>Security keys (2.7.19 and newer).</strong> A node won't send a private message to a node whose key it doesn't have. Node Setup gives each node the other's key, and the app puts it back on its own if it goes missing, for example after you clear a node's node list.</p>
+        </dd>
+
+        <dt>Will my tests go out on the public mesh?</dt>
+        <dd>
+          <p>No. Settings, Node Setup puts both nodes on a private test channel with its own random key, and the app refuses to start a session while a node is on the public channel. Your test traffic stays between your two nodes.</p>
+        </dd>
+
+        <dt>How do I put a node back to its original settings?</dt>
+        <dd>
+          <p>Node Setup saves a backup of each node before it changes anything, and keeps that first backup for good. Connect the node, open Settings, Node backups, and tap "Put this node back the way it was".</p>
+        </dd>
+
+        <dt>Can't connect to a radio?</dt>
+        <dd>
+          <p>A radio accepts only one Bluetooth app at a time. Force-quit the official Meshtastic app or the MeshCore app (and any other app using the radio), then try again. Radios without a screen usually use the pairing code <code>123456</code>. Radios with a screen show a code to type in when iOS asks.</p>
+        </dd>
+
+        <dt>No out-of-range alerts?</dt>
+        <dd>
+          <p>Allow notifications for the app in iOS Settings. Alerts fire when you have been out of range of the base, when you are back, and when the phone loses its Bluetooth link to your radio.</p>
+        </dd>
+
+        <dt>How do I restore my Pro purchase?</dt>
+        <dd>
+          <p>Open Settings, About, tap the Pro row, then tap Restore Purchases. Use the same Apple ID you bought Pro with. Subscriptions are managed in iOS Settings under your name, Subscriptions.</p>
+        </dd>
+
+        <dt>How do I join the beta?</dt>
+        <dd>
+          <p>The beta runs on Apple's TestFlight. Sign up at <a href="https://beta.plateaunerd.com">beta.plateaunerd.com</a>, then install TestFlight from the App Store and accept the invite. Beta testers can send feedback straight from TestFlight.</p>
+        </dd>
+
+        <dt>Is my data private?</dt>
+        <dd>
+          <p>Your recordings stay on your phone. The app has no ads, analytics or tracking. Read the <a href="/privacy">privacy policy</a> for the few things that can go online, each of which you control.</p>
+        </dd>
+      </dl>
+
+      <h2>Accessibility</h2>
+      <p>We want this website to work for everyone, including people who use screen readers, keyboard navigation, zoom or larger text. It aims to meet the Web Content Accessibility Guidelines (WCAG) 2.1 at level AA. If anything on the site is hard to use, email <a href="mailto:support@meshurement.com">support@meshurement.com</a> and we will fix it or get you the information another way.</p>
+
+      <h2>Diagnostics log</h2>
+      <p>If something goes wrong, Settings, About, Share diagnostics log lets you send us the app's recent connection and session log. It stays on your phone unless you share it.</p>
+      <p class="meta">MeshCore is a project of its authors. Meshurement™ is not affiliated with it.</p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="made">Made by <b>Plateau Nerd</b></p>
+      <nav aria-label="Footer">
+        <a href="/support">Support</a>
+        <a href="/privacy">Privacy</a>
+        <a href="https://beta.plateaunerd.com">Beta</a>
+        <!-- TODO: the source repo is still private; it goes public (and may be renamed to meshurement) in Phase 4. Keep the link. -->
+        <a href="https://github.com/motab619/meshurement-source">Source code (GPL-3.0)</a>
+      </nav>
+      <p class="tm">Meshtastic® is a registered trademark of Meshtastic LLC. Meshurement™ is not affiliated with or endorsed by Meshtastic LLC. Meshurement™ is a trademark of Andy Brunker.</p>
+    </div>
+  </footer>
+</body>
+</html>

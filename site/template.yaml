@@ -1,0 +1,349 @@
+# Meshurement website - meshurement.com.
+# Copyright (C) 2026 Andy Brunker (Plateau Nerd)
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Free software under the GNU GPL v3 or later, WITHOUT ANY WARRANTY; see LICENSE.
+#
+# Static site for meshurement.com plus the typo domain meshurment.com.
+# Deploy in us-east-1 (CloudFront certificates must live there): site/deploy.sh.
+# Plateau Nerd pattern: private S3 + CloudFront (OAC) + ACM (DNS-validated) + Route 53 aliases.
+# No WAF and no logging bucket, to keep the monthly cost near zero.
+AWSTemplateFormatVersion: "2010-09-09"
+Description: meshurement.com static website (S3 + CloudFront + ACM + Route 53)
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: meshurement.com
+  HostedZoneId:
+    Type: AWS::Route53::HostedZone::Id
+    Default: Z0237707UGAMH4TWL4IA
+  AppleDomainVerification:
+    Type: String
+    Default: apple-domain=L4pWnzj2Yutd1D3O
+    Description: iCloud+ Custom Email Domain verification TXT for the apex
+  TypoDomainName:
+    Type: String
+    Default: meshurment.com
+  TypoHostedZoneId:
+    Type: AWS::Route53::HostedZone::Id
+    Default: Z0181900TLOQVJYBGVSL
+
+Mappings:
+  CloudFront:
+    Global:
+      AliasZoneId: Z2FDTNDATAQYW2 # fixed hosted zone id for every CloudFront alias
+      CachingOptimized: 658327ea-f89d-4fab-a63d-7e88639e58f6 # AWS managed cache policy
+      CachingDisabled: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # AWS managed cache policy
+      SecurityHeaders: 67f7725c-6f97-4210-82d7-5512b31e9d03 # AWS managed SecurityHeadersPolicy
+
+Resources:
+  # ---------- meshurement.com ----------
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "meshurement-site-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  SiteOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${DomainName}-oac"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SiteBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: CloudFrontReadOnly
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "${SiteBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${SiteDistribution}"
+
+  SiteCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainName
+      SubjectAlternativeNames:
+        - !Sub "www.${DomainName}"
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref DomainName
+          HostedZoneId: !Ref HostedZoneId
+        - DomainName: !Sub "www.${DomainName}"
+          HostedZoneId: !Ref HostedZoneId
+
+  # www -> apex (301), and clean URLs: /privacy -> /privacy/index.html.
+  SiteRouterFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: meshurement-site-router
+      AutoPublish: true
+      FunctionConfig:
+        Comment: www to apex 301, and directory index for clean URLs
+        Runtime: cloudfront-js-2.0
+      FunctionCode: !Sub |
+        function qs(q) {
+          var parts = [];
+          for (var k in q) {
+            var v = q[k];
+            if (v.multiValue) {
+              v.multiValue.forEach(function (m) { parts.push(k + (m.value ? '=' + m.value : '')); });
+            } else {
+              parts.push(k + (v.value ? '=' + v.value : ''));
+            }
+          }
+          return parts.length ? '?' + parts.join('&') : '';
+        }
+        function handler(event) {
+          var req = event.request;
+          var host = req.headers.host ? req.headers.host.value.toLowerCase() : '';
+          if (host === 'www.${DomainName}') {
+            return {
+              statusCode: 301,
+              statusDescription: 'Moved Permanently',
+              headers: {
+                location: { value: 'https://${DomainName}' + req.uri + qs(req.querystring) },
+                'cache-control': { value: 'max-age=86400' }
+              }
+            };
+          }
+          var uri = req.uri;
+          if (uri.endsWith('/')) {
+            req.uri = uri + 'index.html';
+          } else if (uri.split('/').pop().indexOf('.') === -1) {
+            req.uri = uri + '/index.html';
+          }
+          return req;
+        }
+
+  SiteDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: meshurement.com
+        Enabled: true
+        Aliases:
+          - !Ref DomainName
+          - !Sub "www.${DomainName}"
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: !Ref SiteCertificate
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+        Origins:
+          - Id: s3-site
+            DomainName: !GetAtt SiteBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt SiteOAC.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        DefaultCacheBehavior:
+          TargetOriginId: s3-site
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD]
+          CachedMethods: [GET, HEAD]
+          Compress: true
+          CachePolicyId: !FindInMap [CloudFront, Global, CachingOptimized]
+          ResponseHeadersPolicyId: !FindInMap [CloudFront, Global, SecurityHeaders]
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt SiteRouterFunction.FunctionMetadata.FunctionARN
+        # With OAC and no ListBucket, a missing key comes back as 403.
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 404
+            ResponsePagePath: /404.html
+            ErrorCachingMinTTL: 60
+          - ErrorCode: 404
+            ResponseCode: 404
+            ResponsePagePath: /404.html
+            ErrorCachingMinTTL: 60
+
+  SiteRecords:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      RecordSets:
+        - Name: !Ref DomainName
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt SiteDistribution.DomainName
+            HostedZoneId: !FindInMap [CloudFront, Global, AliasZoneId]
+        - Name: !Ref DomainName
+          Type: AAAA
+          AliasTarget:
+            DNSName: !GetAtt SiteDistribution.DomainName
+            HostedZoneId: !FindInMap [CloudFront, Global, AliasZoneId]
+        - Name: !Sub "www.${DomainName}"
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt SiteDistribution.DomainName
+            HostedZoneId: !FindInMap [CloudFront, Global, AliasZoneId]
+        - Name: !Sub "www.${DomainName}"
+          Type: AAAA
+          AliasTarget:
+            DNSName: !GetAtt SiteDistribution.DomainName
+            HostedZoneId: !FindInMap [CloudFront, Global, AliasZoneId]
+
+  # ---------- Mail: iCloud+ Custom Email Domain (hello@, andy@, support@) ----------
+  # Records as iCloud lists them (icloud.com/settings, Custom Email Domain, meshurement.com).
+  MailRecords:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      RecordSets:
+        - Name: !Ref DomainName
+          Type: MX
+          TTL: "3600"
+          ResourceRecords:
+            - "10 mx01.mail.icloud.com."
+            - "10 mx02.mail.icloud.com."
+        - Name: !Ref DomainName
+          Type: TXT
+          TTL: "3600"
+          ResourceRecords:
+            - !Sub '"${AppleDomainVerification}"'
+            - '"v=spf1 include:icloud.com ~all"'
+        - Name: !Sub "sig1._domainkey.${DomainName}"
+          Type: CNAME
+          TTL: "3600"
+          ResourceRecords:
+            - !Sub "sig1.dkim.${DomainName}.at.icloudmailadmin.com."
+        # Monitor only for now; tighten to quarantine once mail is flowing.
+        - Name: !Sub "_dmarc.${DomainName}"
+          Type: TXT
+          TTL: "3600"
+          ResourceRecords:
+            - '"v=DMARC1; p=none"'
+
+  # ---------- meshurment.com (typo) -> https://meshurement.com ----------
+  TypoCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref TypoDomainName
+      SubjectAlternativeNames:
+        - !Sub "www.${TypoDomainName}"
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref TypoDomainName
+          HostedZoneId: !Ref TypoHostedZoneId
+        - DomainName: !Sub "www.${TypoDomainName}"
+          HostedZoneId: !Ref TypoHostedZoneId
+
+  TypoRedirectFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: meshurement-typo-redirect
+      AutoPublish: true
+      FunctionConfig:
+        Comment: 301 every request on the typo domain to the real one, keeping the path
+        Runtime: cloudfront-js-2.0
+      FunctionCode: !Sub |
+        function handler(event) {
+          return {
+            statusCode: 301,
+            statusDescription: 'Moved Permanently',
+            headers: {
+              location: { value: 'https://${DomainName}' + event.request.uri },
+              'cache-control': { value: 'max-age=86400' }
+            }
+          };
+        }
+
+  TypoDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: meshurment.com typo redirect
+        Enabled: true
+        Aliases:
+          - !Ref TypoDomainName
+          - !Sub "www.${TypoDomainName}"
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: !Ref TypoCertificate
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+        # The function answers every request, so the origin is never contacted.
+        Origins:
+          - Id: apex
+            DomainName: !Ref DomainName
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols: [TLSv1.2]
+        DefaultCacheBehavior:
+          TargetOriginId: apex
+          # allow-all so http://meshurment.com goes straight to the real https site in one hop.
+          ViewerProtocolPolicy: allow-all
+          AllowedMethods: [GET, HEAD]
+          CachedMethods: [GET, HEAD]
+          CachePolicyId: !FindInMap [CloudFront, Global, CachingDisabled]
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt TypoRedirectFunction.FunctionMetadata.FunctionARN
+
+  TypoRecords:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Ref TypoHostedZoneId
+      RecordSets:
+        - Name: !Ref TypoDomainName
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt TypoDistribution.DomainName
+            HostedZoneId: !FindInMap [CloudFront, Global, AliasZoneId]
+        - Name: !Ref TypoDomainName
+          Type: AAAA
+          AliasTarget:
+            DNSName: !GetAtt TypoDistribution.DomainName
+            HostedZoneId: !FindInMap [CloudFront, Global, AliasZoneId]
+        - Name: !Sub "www.${TypoDomainName}"
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt TypoDistribution.DomainName
+            HostedZoneId: !FindInMap [CloudFront, Global, AliasZoneId]
+        - Name: !Sub "www.${TypoDomainName}"
+          Type: AAAA
+          AliasTarget:
+            DNSName: !GetAtt TypoDistribution.DomainName
+            HostedZoneId: !FindInMap [CloudFront, Global, AliasZoneId]
+
+Outputs:
+  BucketName:
+    Value: !Ref SiteBucket
+  DistributionId:
+    Value: !Ref SiteDistribution
+  DistributionDomain:
+    Value: !GetAtt SiteDistribution.DomainName
+  TypoDistributionId:
+    Value: !Ref TypoDistribution
+  SiteUrl:
+    Value: !Sub "https://${DomainName}"

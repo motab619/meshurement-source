@@ -1,0 +1,511 @@
+Meshurement -- third-party notices
+====================================
+
+Meshurement is licensed under the GNU General Public License v3.0 (see
+LICENSE). It includes or depends on the third-party components below, each
+under its own license. Full license texts for the Dart/Flutter packages are
+available in the app (Settings -> licenses page) and in each package's
+LICENSE file. Packages are listed alphabetically after the special entries.
+
+Trademark: Meshtastic(R) is a registered trademark of Meshtastic LLC. Mesh
+Analyzer is not affiliated with or endorsed by Meshtastic LLC.
+
+MeshCore: Meshurement works with MeshCore companion radios over Bluetooth.
+MeshCore is a project of its authors; Meshurement is not affiliated with
+it.
+
+
+SPECIAL ENTRIES
+===============
+
+Meshtastic protobuf definitions -- GPL-3.0
+  Copyright (c) Meshtastic LLC
+  https://github.com/meshtastic/protobufs
+  Vendored in lib/proto/meshtastic/; Dart code is generated from them.
+
+Protocol references (MeshCore) -- no code copied
+  The MeshCore companion protocol support (lib/data/radio/meshcore/) was
+  written from reading the sources below. Nothing from them is included in
+  the app.
+  MeshCore firmware -- MIT
+    Copyright (c) 2025 Scott Powell / rippleradios.com
+    https://github.com/meshcore-dev/MeshCore
+    The suggested radio settings list (MeshCorePresets) is a snapshot of the
+    MeshCore App API data its docs/radio_presets.md describes.
+  MeshMapper (Flutter app) -- MIT
+    Copyright (c) 2026 MeshMapper
+    https://github.com/DaveWoodCom/MeshMapper_Flutter_App
+  meshcore-open (Flutter app) -- MIT
+    Copyright (c) 2025 zjs81
+    https://github.com/zjs81/meshcore-open
+
+OpenStreetMap map data and tiles -- ODbL-1.0
+  Map data (c) OpenStreetMap contributors
+  https://www.openstreetmap.org/copyright
+  Tiles are served by the OpenStreetMap tile servers under their tile usage
+  policy, except inside the region covered by our own tiles (below).
+
+Self-hosted map tiles (built by tool/tiles/, served from our CloudFront when
+configured in lib/utils/map_tiles.dart):
+  Streets: rendered from OpenStreetMap data -- ODbL-1.0,
+          (c) OpenStreetMap contributors; vector tiles in the OpenMapTiles
+          schema -- CC-BY-4.0, (c) OpenMapTiles (https://openmaptiles.org),
+          built with Planetiler (Apache-2.0) and rendered with MapLibre
+          Native (BSD-2-Clause); label glyphs: Noto Sans (SIL OFL 1.1) from
+          protomaps/basemaps-assets. None of these tools ship in the app.
+  Hillshade and contours: USGS 3D Elevation Program (3DEP) 1/3 arc-second
+          DEM, public domain (https://www.usgs.gov/3d-elevation-program);
+          NASA SRTM 1 arc-second where used, public domain. Processed with
+          GDAL (MIT).
+  The PMTiles reader (lib/data/tiles/) is our own, following the PMTiles v3
+  specification (https://github.com/protomaps/PMTiles, BSD-3-Clause spec).
+
+Elevation data -- Open Topo Data (https://www.opentopodata.org), only when the
+user turns on "Online terrain data". Datasets requested:
+  ned10m: USGS National Elevation Dataset / 3D Elevation Program, 10 m
+          (contiguous US), public domain (https://www.usgs.gov/3d-elevation-program)
+  srtm30m: NASA Shuttle Radar Topography Mission (SRTM), 30 m (elsewhere),
+          public domain (https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1)
+  Served through the public Open Topo Data API (MIT-licensed software).
+
+B612 and B612 Mono typefaces -- SIL Open Font License 1.1
+  Copyright 2012 The B612 Project Authors (Airbus / PolarSys)
+  https://github.com/polarsys/b612
+  Bundled in assets/fonts/ (licence text: assets/fonts/OFL-B612.txt). The
+  app's typeface; "B612" is a reserved font name under the OFL and the
+  files are unmodified.
+
+Courier Prime typeface -- SIL Open Font License 1.1
+  Copyright 2015 The Courier Prime Project Authors
+  https://github.com/quoteunquoteapps/CourierPrime
+  Bundled in assets/fonts/ (licence text: assets/fonts/OFL-CourierPrime.txt),
+  unmodified. Used by the Mission Field Report style.
+
+Fredoka typeface -- SIL Open Font License 1.1
+  Copyright 2016 The Fredoka Project Authors
+  https://github.com/hafontia/Fredoka-One
+  Bundled in assets/fonts/ (licence text: assets/fonts/OFL-Fredoka.txt),
+  unmodified. Used by the Pop Field Report style.
+
+Flutter SDK -- BSD-3-Clause
+  Copyright (c) The Flutter Authors
+  https://flutter.dev
+  (includes the flutter, flutter_web_plugins and sky_engine packages)
+
+Dart SDK -- BSD-3-Clause
+  Copyright (c) The Dart project authors
+  https://dart.dev
+
+SQLite (bundled by sqlite3_flutter_libs) -- public domain
+  https://www.sqlite.org/copyright.html
+
+Native iOS libraries (CocoaPods pulled in by file_picker, compiled into the
+app; versions from ios/Podfile.lock). Each is MIT: the copyright notice
+and permission notice are reproduced with this file.
+  DKImagePickerController 4.3.9 -- MIT
+    Copyright (c) 2014 Bannings
+    https://github.com/zhangao0086/DKImagePickerController
+  DKPhotoGallery 0.0.19 -- MIT
+    Copyright (c) 2014 Bannings
+    https://github.com/zhangao0086/DKPhotoGallery
+  SDWebImage 5.21.7 -- MIT
+    Copyright (c) 2009-2020 Olivier Poitrey rs@dailymotion.com
+    https://github.com/SDWebImage/SDWebImage
+  SwiftyGif 5.4.5 -- MIT
+    Copyright (c) 2016 Alexis Creuzot
+    https://github.com/kirualex/SwiftyGif
+  MIT License: Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to permit
+  persons to whom the Software is furnished to do so, subject to the
+  following conditions: The above copyright notice and this permission
+  notice shall be included in all copies or substantial portions of the
+  Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+  NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+  USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+PUB.DEV PACKAGES (87)
+=====================
+
+Runtime dependency graph (flutter pub deps --no-dev), restricted to code that
+ships in the iOS app. Android/Linux/Windows/Web-only platform implementations
+and their private dependencies are not shipped on iOS and are omitted.
+
+archive 4.5.2 -- MIT
+  Copyright (c) 2013-2021 Brendan Duncan
+  https://pub.dev/packages/archive
+
+args 2.7.0 -- BSD-3-Clause
+  Copyright (c) 2013, the Dart project authors
+  https://pub.dev/packages/args
+
+async 2.13.0 -- BSD-3-Clause
+  Copyright (c) 2015, the Dart project authors
+  https://pub.dev/packages/async
+
+characters 1.4.1 -- BSD-3-Clause
+  Copyright (c) 2019, the Dart project authors
+  https://pub.dev/packages/characters
+
+clock 1.1.2 -- Apache-2.0
+  Copyright (c) The Dart project authors (LICENSE contains no copyright line)
+  https://pub.dev/packages/clock
+
+code_assets 1.0.0 -- BSD-3-Clause
+  Copyright (c) 2025, the Dart project authors
+  https://pub.dev/packages/code_assets
+
+collection 1.19.1 -- BSD-3-Clause
+  Copyright (c) 2015, the Dart project authors
+  https://pub.dev/packages/collection
+
+convert 3.1.2 -- BSD-3-Clause
+  Copyright (c) 2015, the Dart project authors
+  https://pub.dev/packages/convert
+
+cross_file 0.3.5+2 -- BSD-3-Clause
+  Copyright (c) 2013 The Flutter Authors
+  https://pub.dev/packages/cross_file
+
+crypto 3.0.7 -- BSD-3-Clause
+  Copyright (c) 2015, the Dart project authors
+  https://pub.dev/packages/crypto
+
+csv 6.0.0 -- MIT
+  Copyright (c) 2014 Christian Loitsch
+  https://pub.dev/packages/csv
+
+dart_earcut 1.2.0 -- MIT
+  Copyright (c) 2025 Luka Stillingfleet (JaffaKetchup)
+  https://pub.dev/packages/dart_earcut
+
+dart_polylabel2 1.0.0 -- BSD-3-Clause AND ISC
+  Copyright (c) André Sousa, Luka Stillingfleet (JaffaKetchup); ISC portion (c) 2016 Mapbox
+  https://pub.dev/packages/dart_polylabel2
+
+drift 2.28.2 -- MIT
+  Copyright (c) 2021 Simon Binder
+  https://pub.dev/packages/drift
+
+ffi 2.2.0 -- BSD-3-Clause
+  Copyright (c) 2019, the Dart project authors
+  https://pub.dev/packages/ffi
+
+file 7.0.1 -- BSD-3-Clause
+  Copyright (c) 2017, the Dart project authors
+  https://pub.dev/packages/file
+
+file_picker 8.3.7 -- MIT
+  Copyright (c) 2018 Miguel Ruivo
+  https://pub.dev/packages/file_picker
+
+fixnum 1.1.1 -- BSD-3-Clause
+  Copyright (c) 2014, the Dart project authors
+  https://pub.dev/packages/fixnum
+
+flutter_blue_plus 1.36.8 -- BSD-3-Clause
+  Copyright (c) 2017-2024 Paul DeMarco, Bosko Popovic, Charles Weinberger, Thomas Clark
+  https://pub.dev/packages/flutter_blue_plus
+
+flutter_blue_plus_darwin 7.0.3 -- BSD-3-Clause
+  Copyright (c) 2017-2024, Paul DeMarco, Bosko Popovic, Charles Weinberger, Thomas Clark
+  https://pub.dev/packages/flutter_blue_plus_darwin
+
+flutter_blue_plus_platform_interface 7.0.0 -- BSD-3-Clause
+  Copyright (c) 2017-2024, Paul DeMarco, Bosko Popovic, Charles Weinberger, Thomas Clark
+  https://pub.dev/packages/flutter_blue_plus_platform_interface
+
+flutter_local_notifications 18.0.1 -- BSD-3-Clause
+  Copyright (c) 2018 Michael Bui
+  https://pub.dev/packages/flutter_local_notifications
+
+flutter_local_notifications_platform_interface 8.0.0 -- BSD-3-Clause
+  Copyright (c) 2020 Michael Bui
+  https://pub.dev/packages/flutter_local_notifications_platform_interface
+
+flutter_compass 0.8.1 -- MIT
+  Copyright (c) 2018 Hemanth Raj V
+  https://pub.dev/packages/flutter_compass
+
+flutter_map 8.2.2 -- BSD-3-Clause
+  Copyright (c) 2018-2025 the 'flutter_map' authors and maintainers
+  https://pub.dev/packages/flutter_map
+
+flutter_plugin_android_lifecycle 2.0.35 -- BSD-3-Clause
+  Copyright 2013 The Flutter Authors
+  https://pub.dev/packages/flutter_plugin_android_lifecycle
+
+flutter_riverpod 2.6.1 -- MIT
+  Copyright (c) 2020 Remi Rousselet
+  https://pub.dev/packages/flutter_riverpod
+
+geolocator 13.0.4 -- MIT
+  Copyright (c) 2018 Baseflow
+  https://pub.dev/packages/geolocator
+
+geolocator_apple 2.3.13 -- MIT
+  Copyright (c) 2018 Baseflow
+  https://pub.dev/packages/geolocator_apple
+
+geolocator_platform_interface 4.2.6 -- MIT
+  Copyright (c) 2018 Baseflow
+  https://pub.dev/packages/geolocator_platform_interface
+
+glob 2.1.3 -- BSD-3-Clause
+  Copyright (c) 2014, the Dart project authors
+  https://pub.dev/packages/glob
+
+hooks 1.0.2 -- BSD-3-Clause
+  Copyright (c) 2025, the Dart project authors
+  https://pub.dev/packages/hooks
+
+http 1.6.0 -- BSD-3-Clause
+  Copyright (c) 2014, the Dart project authors
+  https://pub.dev/packages/http
+
+http_parser 4.1.2 -- BSD-3-Clause
+  Copyright (c) 2014, the Dart project authors
+  https://pub.dev/packages/http_parser
+
+in_app_purchase 3.3.1 -- BSD-3-Clause
+  Copyright 2013 The Flutter Authors
+  https://pub.dev/packages/in_app_purchase
+
+in_app_purchase_android 0.5.0 -- BSD-3-Clause
+  Copyright 2013 The Flutter Authors
+  https://pub.dev/packages/in_app_purchase_android
+
+in_app_purchase_platform_interface 1.4.1 -- BSD-3-Clause
+  Copyright 2013 The Flutter Authors
+  https://pub.dev/packages/in_app_purchase_platform_interface
+
+in_app_purchase_storekit 0.4.13+2 -- BSD-3-Clause
+  Copyright 2013 The Flutter Authors
+  https://pub.dev/packages/in_app_purchase_storekit
+
+intl 0.19.0 -- BSD-3-Clause
+  Copyright (c) 2013, the Dart project authors
+  https://pub.dev/packages/intl
+
+json_annotation 4.11.0 -- BSD-3-Clause
+  Copyright 2017, the Dart project authors
+  https://pub.dev/packages/json_annotation
+
+latlong2 0.9.1 -- Apache-2.0
+  Copyright (c) 2015 Michael Mitterer
+  https://pub.dev/packages/latlong2
+
+lists 1.0.1 -- BSD-3-Clause
+  Copyright (c) 2014, Andrew Mezoni
+  https://pub.dev/packages/lists
+
+logger 2.6.2 -- MIT
+  Copyright (c) 2019 Simon Leier, 2019 Harm Aarts, 2023 Severin Hamader
+  https://pub.dev/packages/logger
+
+logging 1.3.0 -- BSD-3-Clause
+  Copyright (c) 2013, the Dart project authors
+  https://pub.dev/packages/logging
+
+material_color_utilities 0.13.0 -- Apache-2.0
+  Copyright (c) 2021 Google LLC
+  https://pub.dev/packages/material_color_utilities
+
+meta 1.17.0 -- BSD-3-Clause
+  Copyright (c) 2016, the Dart project authors
+  https://pub.dev/packages/meta
+
+mgrs_dart 2.0.0 -- MIT
+  Copyright (c) 2020 Gergely Padányi-Gulyás
+  https://pub.dev/packages/mgrs_dart
+
+mime 2.0.0 -- BSD-3-Clause
+  Copyright (c) 2015, the Dart project authors
+  https://pub.dev/packages/mime
+
+native_toolchain_c 0.17.5 -- BSD-3-Clause
+  Copyright (c) 2023, the Dart project authors
+  https://pub.dev/packages/native_toolchain_c
+
+objective_c 9.3.0 -- BSD-3-Clause
+  Copyright (c) 2024, the Dart project authors
+  https://pub.dev/packages/objective_c
+
+package_info_plus 9.0.1 -- BSD-3-Clause
+  Copyright (c) 2017 The Chromium Authors
+  https://pub.dev/packages/package_info_plus
+
+package_info_plus_platform_interface 3.2.1 -- BSD-3-Clause
+  Copyright (c) 2017 The Chromium Authors
+  https://pub.dev/packages/package_info_plus_platform_interface
+
+path 1.9.1 -- BSD-3-Clause
+  Copyright (c) 2014, the Dart project authors
+  https://pub.dev/packages/path
+
+path_provider 2.1.5 -- BSD-3-Clause
+  Copyright (c) 2013 The Flutter Authors
+  https://pub.dev/packages/path_provider
+
+path_provider_foundation 2.6.0 -- BSD-3-Clause
+  Copyright (c) 2013 The Flutter Authors
+  https://pub.dev/packages/path_provider_foundation
+
+path_provider_platform_interface 2.1.2 -- BSD-3-Clause
+  Copyright (c) 2013 The Flutter Authors
+  https://pub.dev/packages/path_provider_platform_interface
+
+permission_handler 12.0.1 -- MIT
+  Copyright (c) 2018 Baseflow
+  https://pub.dev/packages/permission_handler
+
+permission_handler_apple 9.4.7 -- MIT
+  Copyright (c) 2018 Baseflow
+  https://pub.dev/packages/permission_handler_apple
+
+permission_handler_platform_interface 4.3.0 -- MIT
+  Copyright (c) 2018 Baseflow
+  https://pub.dev/packages/permission_handler_platform_interface
+
+platform 3.1.6 -- BSD-3-Clause
+  Copyright (c) 2017, the Dart project authors
+  https://pub.dev/packages/platform
+
+plugin_platform_interface 2.1.8 -- BSD-3-Clause
+  Copyright (c) 2013 The Flutter Authors
+  https://pub.dev/packages/plugin_platform_interface
+
+posix 6.5.2 -- MIT
+  Copyright (c) 2020 Brett Sutton
+  https://pub.dev/packages/posix
+
+proj4dart 2.1.0 -- MIT
+  Copyright (c) 2020 maRci002, Gergely Padányi-Gulyás (fegyi001)
+  https://pub.dev/packages/proj4dart
+
+protobuf 4.2.0 -- BSD-3-Clause
+  Copyright (c) 2013, the Dart project authors
+  https://pub.dev/packages/protobuf
+
+pub_semver 2.2.0 -- BSD-3-Clause
+  Copyright (c) 2014, the Dart project authors
+  https://pub.dev/packages/pub_semver
+
+riverpod 2.6.1 -- MIT
+  Copyright (c) 2020 Remi Rousselet
+  https://pub.dev/packages/riverpod
+
+riverpod_annotation 2.6.1 -- MIT
+  Copyright (c) 2020 Remi Rousselet
+  https://pub.dev/packages/riverpod_annotation
+
+share_plus 10.1.4 -- BSD-3-Clause
+  Copyright (c) 2017, the Flutter project authors
+  https://pub.dev/packages/share_plus
+
+share_plus_platform_interface 5.0.2 -- BSD-3-Clause
+  Copyright (c) 2017 The Chromium Authors
+  https://pub.dev/packages/share_plus_platform_interface
+
+shared_preferences 2.5.4 -- BSD-3-Clause
+  Copyright (c) 2013 The Flutter Authors
+  https://pub.dev/packages/shared_preferences
+
+shared_preferences_foundation 2.5.6 -- BSD-3-Clause
+  Copyright (c) 2013 The Flutter Authors
+  https://pub.dev/packages/shared_preferences_foundation
+
+shared_preferences_platform_interface 2.4.1 -- BSD-3-Clause
+  Copyright (c) 2013 The Flutter Authors
+  https://pub.dev/packages/shared_preferences_platform_interface
+
+source_span 1.10.2 -- BSD-3-Clause
+  Copyright (c) 2014, the Dart project authors
+  https://pub.dev/packages/source_span
+
+sqlite3 2.9.4 -- MIT
+  Copyright (c) 2020 Simon Binder
+  https://pub.dev/packages/sqlite3
+
+sqlite3_flutter_libs 0.5.42 -- MIT
+  Copyright (c) 2020 Simon Binder
+  https://pub.dev/packages/sqlite3_flutter_libs
+
+stack_trace 1.12.1 -- BSD-3-Clause
+  Copyright (c) 2014, the Dart project authors
+  https://pub.dev/packages/stack_trace
+
+state_notifier 1.0.0 -- MIT
+  Copyright (c) 2020 Remi Rousselet
+  https://pub.dev/packages/state_notifier
+
+stream_channel 2.1.4 -- BSD-3-Clause
+  Copyright (c) 2015, the Dart project authors
+  https://pub.dev/packages/stream_channel
+
+string_scanner 1.4.1 -- BSD-3-Clause
+  Copyright (c) 2014, the Dart project authors
+  https://pub.dev/packages/string_scanner
+
+term_glyph 1.2.2 -- BSD-3-Clause
+  Copyright (c) 2017, the Dart project authors
+  https://pub.dev/packages/term_glyph
+
+timezone 0.10.1 -- BSD-2-Clause
+  Copyright (c) 2014, timezone project authors
+  https://pub.dev/packages/timezone
+
+typed_data 1.4.0 -- BSD-3-Clause
+  Copyright (c) 2015, the Dart project authors
+  https://pub.dev/packages/typed_data
+
+unicode 0.3.1 -- BSD-3-Clause
+  Copyright (c) 2014, Andrew Mezoni
+  https://pub.dev/packages/unicode
+
+url_launcher 6.3.3 -- BSD-3-Clause
+  Copyright 2013 The Flutter Authors
+  https://pub.dev/packages/url_launcher
+
+url_launcher_ios 6.4.2 -- BSD-3-Clause
+  Copyright 2013 The Flutter Authors
+  https://pub.dev/packages/url_launcher_ios
+
+url_launcher_platform_interface 2.3.2 -- BSD-3-Clause
+  Copyright (c) 2013 The Flutter Authors
+  https://pub.dev/packages/url_launcher_platform_interface
+
+uuid 4.5.3 -- MIT
+  Copyright (c) 2021 Yulian Kuncheff
+  https://pub.dev/packages/uuid
+
+vector_math 2.2.0 -- BSD-3-Clause
+  Copyright (c) 2015, Google Inc
+  https://pub.dev/packages/vector_math
+
+wakelock_plus 1.5.1 -- BSD-3-Clause
+  Copyright (c) 2020-2023, creativecreatorormaybenot
+  https://pub.dev/packages/wakelock_plus
+
+wakelock_plus_platform_interface 1.4.0 -- BSD-3-Clause
+  Copyright (c) 2020-2023, creativecreatorormaybenot
+  https://pub.dev/packages/wakelock_plus_platform_interface
+
+web 1.1.1 -- BSD-3-Clause
+  Copyright (c) 2023, the Dart project authors
+  https://pub.dev/packages/web
+
+wkt_parser 2.0.0 -- MIT
+  Copyright (c) 2020 Gergely Padányi-Gulyás
+  https://pub.dev/packages/wkt_parser
+
+yaml 3.1.3 -- MIT
+  Copyright (c) 2014 the Dart project authors; 2006 Kirill Simonov
+  https://pub.dev/packages/yaml

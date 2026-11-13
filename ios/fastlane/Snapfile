@@ -1,0 +1,20 @@
+# App screenshots: `cd ios && fastlane snapshot`
+# Runs ios/RunnerUITests/ScreenshotTests.swift in demo mode (no radio,
+# no real data). Output: ios/fastlane/screenshots/en-US/
+
+workspace("Runner.xcworkspace")
+scheme("Screenshots")
+configuration("Debug")
+
+# iPad 13" screenshots are required once the app runs on iPad
+# (docs/design/ipad/README.md). The iPhone Duo has no simulator yet.
+devices(["iPhone 18 Pro Max", "iPad Pro 13-inch (M5)"])
+languages(["en-US"])
+
+output_directory("./fastlane/screenshots")
+clear_previous_screenshots(true)
+override_status_bar(true)   # 9:41, full battery and signal
+skip_open_summary(true)
+concurrent_simulators(false)
+reinstall_app(true)
+app_identifier("com.andybrunker.meshAnalyzer")

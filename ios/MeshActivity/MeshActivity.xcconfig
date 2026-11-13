@@ -1,0 +1,7 @@
+// The Live Activity extension must have the same version and build number
+// as the app (App Store Connect rejects mismatches), so take both from
+// pubspec.yaml via Flutter's generated settings.
+#include "../Flutter/Generated.xcconfig"
+
+MARKETING_VERSION = $(FLUTTER_BUILD_NAME)
+CURRENT_PROJECT_VERSION = $(FLUTTER_BUILD_NUMBER)

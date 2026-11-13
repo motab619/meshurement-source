@@ -1,0 +1,12 @@
+{
+  "name": "meshurement-tile-render",
+  "private": true,
+  "description": "Renders raster map tiles for Meshurement (tool/tiles). GPL-3.0-or-later.",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "engines": { "node": ">=22.5" },
+  "dependencies": {
+    "@maplibre/maplibre-gl-native": "^6.1.0",
+    "sharp": "^0.34.1"
+  }
+}

@@ -1,0 +1,96 @@
+# Meshurement - maps LoRa mesh radio coverage.
+# Copyright (C) 2026 Andy Brunker (Plateau Nerd)
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Free software under the GNU GPL v3 or later, WITHOUT ANY WARRANTY; see LICENSE.
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Meshurement AI session analysis (numbers-only digest in, narrative out)
+
+Parameters:
+  AnthropicSecretArn:
+    Type: String
+    Description: >-
+      ARN of the Secrets Manager secret holding the Anthropic API key (a bare
+      key or {"ANTHROPIC_API_KEY": "..."}). The key itself is never a Lambda
+      environment variable.
+  AppToken:
+    Type: String
+    NoEcho: true
+    MinLength: 24
+    Description: >-
+      Shared app token; requests without a matching X-App-Token header get
+      401. The app is built with the same value (--dart-define=AI_APP_TOKEN=...).
+  DeviceDailyLimit:
+    Type: Number
+    Default: 25
+    Description: Analyses per device per UTC day.
+  DeviceMonthlyLimit:
+    Type: Number
+    Default: 300
+    Description: Analyses per device per UTC month.
+  IpDailyLimit:
+    Type: Number
+    Default: 100
+    Description: Analyses per source IP per UTC day (catches made-up device ids).
+  GlobalDailyLimit:
+    Type: Number
+    Default: 2000
+    Description: Hard cap on analyses per UTC day across all devices (the budget).
+  ModelId:
+    Type: String
+    Default: claude-haiku-5-5
+    Description: Anthropic model id; change with a parameter override, not a code edit.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 60
+    MemorySize: 256
+
+Resources:
+  QuotaTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: mesh-analyzer-ai-quota
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: expires
+        Enabled: true
+
+  AnalysisFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handler.lambda_handler
+      Architectures: [arm64]
+      Environment:
+        Variables:
+          ANTHROPIC_SECRET_ARN: !Ref AnthropicSecretArn
+          APP_TOKEN: !Ref AppToken
+          QUOTA_TABLE: !Ref QuotaTable
+          DEVICE_DAILY_LIMIT: !Ref DeviceDailyLimit
+          DEVICE_MONTHLY_LIMIT: !Ref DeviceMonthlyLimit
+          IP_DAILY_LIMIT: !Ref IpDailyLimit
+          GLOBAL_DAILY_LIMIT: !Ref GlobalDailyLimit
+          MODEL_ID: !Ref ModelId
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref QuotaTable
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref AnthropicSecretArn
+      FunctionUrlConfig:
+        # Public URL; the handler checks X-App-Token on every request and
+        # counts quotas per install id and per source IP.
+        AuthType: NONE
+        # No Cors block: the app is not a browser, so CORS stays off.
+
+Outputs:
+  FunctionUrl:
+    Description: Put this in AppConstants.aiAnalysisUrl
+    Value: !GetAtt AnalysisFunctionUrl.FunctionUrl

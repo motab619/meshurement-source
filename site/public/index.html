@@ -1,0 +1,205 @@
+<!doctype html>
+<!--
+  Meshurement website - meshurement.com.
+  Copyright (C) 2026 Andy Brunker (Plateau Nerd)
+  SPDX-License-Identifier: GPL-3.0-or-later
+  Free software under the GNU GPL v3 or later, WITHOUT ANY WARRANTY; see LICENSE.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meshurement™: map how far your LoRa mesh nodes reach</title>
+  <meta name="description" content="Meshurement™ is an iPhone app that maps how far your LoRa mesh nodes reach, in the field. Works with Meshtastic® and MeshCore nodes. No ads, no tracking.">
+  <link rel="canonical" href="https://meshurement.com/">
+  <meta name="theme-color" content="#02081e">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Meshurement™">
+  <meta property="og:title" content="Meshurement™: map how far your LoRa mesh nodes reach">
+  <meta property="og:description" content="An iPhone app that maps how far your LoRa mesh nodes reach, in the field.">
+  <meta property="og:url" content="https://meshurement.com/">
+  <meta property="og:image" content="https://meshurement.com/img/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The Meshurement™ app icon and wordmark">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/css/site.css?v=4">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="/"><img src="/img/favicon-32.png" alt="" width="36" height="36"><span>Mesh<b>urement</b>™</span></a>
+      <nav class="nav" aria-label="Main">
+        <a href="/" aria-current="page">Home</a>
+        <a href="/#pro">Pro</a>
+        <a href="/support">Support</a>
+        <a href="/privacy">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <h1 class="wordmark"><img src="/img/wordmark.webp" alt="Meshurement" width="900" height="213"><span class="tm-mark" aria-hidden="true">™</span></h1>
+          <p class="pitch">Map how far your LoRa mesh nodes reach, in the field. Leave one node at home as the base. Take the other with you, connected to your iPhone over Bluetooth, and watch the coverage draw itself on the map.</p>
+          <div class="cta">
+            <a class="btn" href="https://beta.plateaunerd.com">Join the beta &rarr;</a>
+            <!-- Placeholder until the app is live. Use Apple's official badge artwork only then. -->
+            <span class="badge-soon" role="note"><strong>Coming soon</strong>to the App Store</span>
+          </div>
+        </div>
+        <div class="hero-icon">
+          <img src="/img/icon-512.webp" alt="Meshurement app icon: signal arcs with dots from green to red" width="512" height="512">
+        </div>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="features">
+      <div class="wrap">
+        <div class="speed" aria-hidden="true"><i></i><i></i><i></i></div>
+        <h2 id="features" class="section-title">What it does</h2>
+        <p class="lead measure">You need two LoRa mesh nodes (radios like a Heltec V3 or a T1000-E). One stays at a base. You carry the other, connected to your phone over Bluetooth (the phone itself has no LoRa radio). Meshurement™ logs signal strength with your GPS position, so you can see where your mesh works and where it drops out.</p>
+        <div class="grid">
+          <article class="card">
+            <h3>Live coverage map</h3>
+            <p>Every reading lands on the map as you walk or drive, colored from strong to gone.</p>
+          </article>
+          <article class="card">
+            <h3>Estimated coverage</h3>
+            <p>Fills in the gaps between your readings, and counts unanswered pings as no signal, so a dead zone looks dead.</p>
+          </article>
+          <article class="card">
+            <h3>Compare and test</h3>
+            <p>Compare antennas, range settings and radios over the same route. Guided tests walk you through each step.</p>
+          </article>
+          <article class="card">
+            <h3>Base beacon and pings</h3>
+            <p>The base sends a regular beacon and your phone pings it, so you learn both directions of the link.</p>
+          </article>
+          <article class="card">
+            <h3>CSV and KML export</h3>
+            <p>Take your sessions to a spreadsheet or Google Earth. Exports go only where you send them.</p>
+          </article>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="field">
+      <div class="wrap">
+        <h2 id="field" class="section-title">One test, start to finish</h2>
+        <p class="lead measure">The base on a tripod at the Cove Oasis trailhead in La Quinta. A drive through the Cove and out behind the east ridge, then the same drive with a better antenna. Strong close in, fading with distance, and gone where the hills get in the way.</p>
+        <div class="shots">
+          <figure class="shot">
+            <img src="/img/shot-live.webp" alt="Live map: the drive's readings as colored dots along the streets of La Quinta Cove, green near the base, turning orange and red toward the north end" width="600" height="1304" loading="lazy">
+            <figcaption><b>Live map</b>Every ping and beacon lands where you were when it came back.</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="/img/shot-estimated.webp" alt="Estimated coverage: a colored layer filling the Cove between the readings, dark behind the ridge and up the canyon" width="600" height="1304" loading="lazy">
+            <figcaption><b>Estimated coverage</b>Fills the gaps, and counts the pings nobody answered.</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="/img/shot-compare.webp" alt="Compare: the stock stubby against a 5.8 dBi roof whip over the same drive" width="600" height="1304" loading="lazy">
+            <figcaption><b>Compare</b>Stubby on the dash against a whip on the roof, same streets.</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="/img/shot-charts.webp" alt="Charts: signal to noise and signal strength over the drive" width="600" height="1304" loading="lazy">
+            <figcaption><b>Charts</b>Signal over time, against the limit for your range setting.</figcaption>
+          </figure>
+        </div>
+        <div class="report-row">
+          <img src="/img/shot-report.webp" alt="Field Report card for the drive: a route sketch colored by signal, how often the base was heard and the farthest reading" width="720" height="900" loading="lazy">
+          <div>
+            <h3>Field Report</h3>
+            <p>One card per session or comparison, ready to share in a chat or a forum post. The route is drawn without coordinates, and you can hide the area around your base. Pick what goes under it: a plain grid that keeps your streets private, or the street or terrain map when you want people to see where you went.</p>
+          </div>
+        </div>
+        <p class="meta">Screens from the app's demo mode. The readings are modelled from the real terrain and streets of La Quinta Cove, not recorded on an actual drive.</p>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="privacy">
+      <div class="wrap">
+        <h2 id="privacy" class="section-title">Your data stays on your phone</h2>
+        <ul class="promise">
+          <li>No ads</li>
+          <li>No tracking or analytics</li>
+          <li>No account</li>
+          <li>Recordings stay on the phone</li>
+        </ul>
+        <p class="measure">The app goes online only for map tiles, and for terrain data and AI helpers if you turn them on. The <a href="/privacy">privacy policy</a> lists every one.</p>
+      </div>
+    </section>
+
+    <section class="band pro-band" aria-labelledby="pro">
+      <div class="wrap">
+        <div class="speed" aria-hidden="true"><i></i><i></i><i></i></div>
+        <h2 id="pro" class="section-title">Free maps your coverage. Pro tells you which setup wins.</h2>
+        <p class="lead measure">Free is the whole measuring tool: both mesh types, the live and estimated maps, alerts, Field Report and exports, with no limits on how much you record. Pro is for the next question: of the antennas and radios you own, and the settings you could run them on, which works best?</p>
+        <div class="plans">
+          <div class="plan">
+            <h3>Free</h3>
+            <p class="plan-price">$0</p>
+            <p>Map your coverage with one base node and one you carry.</p>
+          </div>
+          <div class="plan plan-pro">
+            <h3>Pro</h3>
+            <p class="plan-price">$6.99 a year</p>
+            <p>Test up to four setups on one walk and get a verdict, with an AI read of the result. 1-week free trial.</p>
+          </div>
+        </div>
+        <div class="table-scroll" role="region" aria-labelledby="compare-caption" tabindex="0">
+          <table class="compare">
+            <caption id="compare-caption">What Pro adds</caption>
+            <thead>
+              <tr><th scope="col">Feature</th><th scope="col">Free</th><th scope="col" class="col-pro">Pro</th></tr>
+            </thead>
+            <tbody>
+              <tr class="base"><th scope="row">Everything in Free<span class="row-note">Meshtastic® and MeshCore nodes, Node Setup with backups, live map, base beacon and pings, estimated and terrain layers, out-of-range alerts, Field Report with or without street names, CSV, KML and GeoJSON export</span></th><td><span class="yes" aria-hidden="true">&#10003;</span><span class="sr">Included</span></td><td><span class="yes" aria-hidden="true">&#10003;</span><span class="sr">Included</span></td></tr>
+              <tr><th scope="row">Guided tests, up to 4 setups<span class="row-note">Four antennas, one walk, one winner. Free runs two at a time.</span></th><td>2 setups</td><td>Up to 4</td></tr>
+              <tr><th scope="row">Compare any sessions side by side<span class="row-note">Same route, two rigs: which went farther, and by how much.</span></th><td><span class="no" aria-hidden="true">&ndash;</span><span class="sr">Not included</span></td><td><span class="yes" aria-hidden="true">&#10003;</span><span class="sr">Included</span></td></tr>
+              <tr><th scope="row">AI analysis<span class="row-note">What held up, what did not, and what to try next, in plain English.</span></th><td><span class="no" aria-hidden="true">&ndash;</span><span class="sr">Not included</span></td><td><span class="yes" aria-hidden="true">&#10003;</span><span class="sr">Included</span></td></tr>
+              <tr><th scope="row">Hardware profiles<span class="row-note">Every session says what it was recorded with, so results stay comparable months later.</span></th><td><span class="no" aria-hidden="true">&ndash;</span><span class="sr">Not included</span></td><td><span class="yes" aria-hidden="true">&#10003;</span><span class="sr">Included</span></td></tr>
+              <tr><th scope="row">Live Activity<span class="row-note">The recording on your lock screen and Dynamic Island: signal, link and range at a glance. Out-of-range alerts stay free.</span></th><td><span class="no" aria-hidden="true">&ndash;</span><span class="sr">Not included</span></td><td><span class="yes" aria-hidden="true">&#10003;</span><span class="sr">Included</span></td></tr>
+              <tr><th scope="row">Faster than recommended<span class="row-note">Ping and beacon faster than the airtime guideline, for short, dense tests on your private channel.</span></th><td><span class="no" aria-hidden="true">&ndash;</span><span class="sr">Not included</span></td><td><span class="yes" aria-hidden="true">&#10003;</span><span class="sr">Included</span></td></tr>
+              <tr><th scope="row">Field Report comparing up to 4 setups<span class="row-note">One shareable card with the verdict on it.</span></th><td>2 setups</td><td>Up to 4</td></tr>
+              <tr><th scope="row">Change the base from a distance<span class="row-note">Change the base node's range setting or TX power from where you stand, over the mesh. If the base goes quiet, your node goes back to the old setting. Meshtastic® nodes only.</span></th><td><span class="no" aria-hidden="true">&ndash;</span><span class="sr">Not included</span></td><td><span class="yes" aria-hidden="true">&#10003;</span><span class="sr">Included</span></td></tr>
+              <tr><th scope="row">More Field Report styles<span class="row-note">Share in the Pop, Bridge and Mission styles. Night and Basic are free.</span></th><td>2 styles</td><td>All 5</td></tr>
+              <tr><th scope="row">Support an independent developer<span class="row-note">Meshurement is made by one person, with no ads and no tracking. Pro is what keeps it going.</span></th><td><span class="no" aria-hidden="true">&ndash;</span><span class="sr">Not included</span></td><td><span class="yes" aria-hidden="true">&#10003;</span><span class="sr">Included</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="meta">Pro is sold by Apple through the App Store; the price is in US dollars and the App Store sets it where you live. Cancel any time. If Pro lapses, nothing is locked: your sessions, comparisons, profiles and reports stay on your phone, viewable and exportable. Only making new Pro items needs Pro.</p>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="radios">
+      <div class="wrap">
+        <h2 id="radios" class="section-title">Which nodes</h2>
+        <p class="measure">Meshurement™ works with Meshtastic® nodes and MeshCore companion nodes over Bluetooth, both free. You need two of the same kind: one for the base and one to carry. Node Setup puts both on a private test channel, so nothing you do goes out on the public mesh, and it saves a backup first so you can put each node back the way it was.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p class="made">Made by <b>Plateau Nerd</b></p>
+      <nav aria-label="Footer">
+        <a href="/support">Support</a>
+        <a href="/privacy">Privacy</a>
+        <a href="https://beta.plateaunerd.com">Beta</a>
+        <!-- TODO: the source repo (renamed to meshurement 2026-11-05) is still private; it goes public before the App Store launch. Keep the link. -->
+        <a href="https://github.com/motab619/meshurement-source">Source code (GPL-3.0)</a>
+      </nav>
+      <p class="tm">Meshtastic® is a registered trademark of Meshtastic LLC. Meshurement™ is not affiliated with or endorsed by Meshtastic LLC. Meshurement™ is a trademark of Andy Brunker.</p>
+    </div>
+  </footer>
+</body>
+</html>

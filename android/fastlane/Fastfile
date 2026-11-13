@@ -1,0 +1,159 @@
+# Meshurement - maps LoRa mesh radio coverage.
+# Copyright (C) 2026 Andy Brunker (Plateau Nerd)
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Free software under the GNU GPL v3 or later, WITHOUT ANY WARRANTY; see LICENSE.
+
+# fastlane lanes for Google Play. Run from android/ with a UTF-8 locale
+# (fastlane refuses otherwise):
+#   export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+#   fastlane beta      Build for testers (Pro unlocked) and upload to a
+#                      Play testing track (PLAY_TRACK, default "internal")
+#   fastlane release   Build for Play review / production (real paywall) and
+#                      upload it to the production track as a DRAFT
+#
+# Only `beta` passes --dart-define=TESTER_PRO=true (lib/services/
+# test_build.dart). Play's pre-launch and policy reviewers install the same
+# binary as testers, so never promote a `beta` build to production: build
+# production with `release`. docs/design/android/README.md has the setup.
+#
+# Needs android/fastlane/.env (see .env.example; never commit it or the
+# service-account JSON key) and android/key.properties + the upload keystore
+# (tool/android/make_keystore.sh). The very first AAB of a new Play app must
+# be uploaded by hand in Play Console; the API can only add to an app that
+# already has one.
+
+require "base64"
+require "tmpdir"
+
+PACKAGE_NAME = "com.plateaunerd.meshurement"
+
+default_platform(:android)
+
+platform :android do
+  desc "Build for testers (every Pro feature unlocked) and upload to a Play testing track"
+  lane :beta do
+    upload_build(tester_pro: true, track: ENV.fetch("PLAY_TRACK", "internal"))
+  end
+
+  desc "Build for Play production (real paywall) and upload it as a draft release"
+  lane :release do
+    upload_build(tester_pro: false, track: "production")
+  end
+
+  desc "Print the highest versionCode on any Play track (no build, no upload)"
+  lane :version_codes do
+    UI.message("Highest Play versionCode: #{highest_play_version_code}")
+  end
+
+  private_lane :upload_build do |options|
+    tester_pro = options.fetch(:tester_pro)
+    track = options.fetch(:track)
+    root = File.expand_path("../..", __dir__)
+
+    # A release build must not inherit the tester unlock from the shell.
+    if !tester_pro && (ENV.key?("TESTER_PRO") || ENV.key?("TESTFLIGHT_PRO"))
+      UI.user_error!("TESTER_PRO/TESTFLIGHT_PRO is set in the environment; unset it for a release build")
+    end
+
+    # Release gates, as on iOS: a clean tree (so the build matches a commit),
+    # analyzer and tests green. docs/beta/ is owned by a separate workflow.
+    dirty = `git -C #{root} status --porcelain`.lines.reject { |l| l.split(" ", 2).last.to_s.strip.start_with?("docs/beta/") }
+    UI.user_error!("Working tree is not clean; commit or stash first:\n#{dirty.join}") unless dirty.empty?
+
+    # Without key.properties Gradle falls back to the debug key, and Play
+    # rejects a debug-signed bundle. Check before spending a build on it.
+    key_props = File.join(root, "android/key.properties")
+    UI.user_error!("android/key.properties is missing (tool/android/make_keystore.sh)") unless File.exist?(key_props)
+    store_file = File.read(key_props)[/^storeFile=(.*)$/, 1].to_s.strip
+    store_path = File.expand_path(store_file, File.join(root, "android/app"))
+    UI.user_error!("Upload keystore not found: #{store_path}") unless File.exist?(store_path)
+
+    Dir.chdir(root) do
+      sh("flutter", "analyze")
+      sh("flutter", "test")
+    end
+
+    # Play needs a strictly increasing versionCode across every track. Use
+    # one more than the highest on Play (or pubspec's +N, if that is higher).
+    # pubspec.yaml is not edited: like iOS, the store decides the number.
+    pubspec_n = File.read(File.join(root, "pubspec.yaml"))[/^version:\s*[^+\s]+\+(\d+)/, 1].to_i
+    version_code = [highest_play_version_code, pubspec_n - 1].max + 1
+    UI.message("Building versionCode #{version_code}")
+
+    log_path = File.join(root, "build/android-fastlane-build.log")
+    FileUtils.mkdir_p(File.dirname(log_path))
+    Dir.chdir(root) do
+      # AI_APP_TOKEN is the AI Lambda's shared app token (tool/ai-analysis/
+      # README.md). ENV.fetch fails early rather than uploading a build whose
+      # AI cards would say "unavailable". --verbose makes Flutter print the
+      # Gradle command line, which the check below reads.
+      args = ["flutter", "build", "appbundle", "--release", "--verbose",
+              "--build-number=#{version_code}",
+              "--dart-define=AI_APP_TOKEN=#{ENV.fetch("AI_APP_TOKEN")}"]
+      args << "--dart-define=TESTER_PRO=true" if tester_pro
+      # The log holds the token (base64); it stays in build/, which git ignores.
+      UI.message("Running flutter build appbundle (#{tester_pro ? "with" : "without"} TESTER_PRO), log: #{log_path}")
+      ok = system(*args, out: log_path, err: [:child, :out])
+      UI.user_error!("flutter build appbundle failed; see #{log_path}") unless ok
+    end
+
+    # Flutter hands the Dart defines to Gradle as -Pdart-defines=<base64,...>
+    # (flutter_tools build_info.dart encodeDartDefines), and Gradle passes the
+    # same value to `flutter assemble`, which compiles the AOT snapshot. Read
+    # every such value from the verbose log: the tester unlock must be there
+    # for beta and absent for release.
+    encoded = File.read(log_path).scan(/-Pdart-defines=(\S+)/).flatten.uniq
+    UI.user_error!("No -Pdart-defines in #{log_path}; cannot verify the build") if encoded.empty?
+    defines = encoded.flat_map { |e| e.split(",").map { |d| Base64.decode64(d).force_encoding("UTF-8") } }
+    unlocked = defines.any? { |d| d == "TESTER_PRO=true" || d == "TESTFLIGHT_PRO=true" }
+    UI.user_error!("TESTER_PRO is #{unlocked ? "set" : "missing"} in the Gradle dart-defines") if unlocked != tester_pro
+    UI.user_error!("AI_APP_TOKEN missing from the Gradle dart-defines") unless defines.any? { |d| d.start_with?("AI_APP_TOKEN=") && d.length > 13 }
+    UI.message(tester_pro ? "Tester build: Pro unlocked (never promote to production)" : "Store build: real paywall")
+
+    aab = File.join(root, "build/app/outputs/bundle/release/app-release.aab")
+    UI.user_error!("No bundle at #{aab}") unless File.exist?(aab)
+
+    # Signed with the upload key, not the debug key.
+    cert = `"#{keytool_path}" -printcert -jarfile "#{aab}" 2>&1`
+    UI.user_error!("keytool could not read the bundle's signature:\n#{cert}") unless cert.include?("SHA256:")
+    UI.user_error!("Bundle is debug-signed; check android/key.properties") if cert.include?("CN=Android Debug")
+    want = ENV["UPLOAD_CERT_SHA256"].to_s.delete(":").upcase
+    unless want.empty?
+      got = cert[/SHA256:\s*([0-9A-F:]+)/, 1].to_s.delete(":")
+      UI.user_error!("Bundle signer SHA-256 #{got} != UPLOAD_CERT_SHA256") if got != want
+    end
+
+    upload_to_play_store(
+      package_name: PACKAGE_NAME,
+      json_key: File.expand_path(ENV.fetch("PLAY_JSON_KEY")),
+      track: track,
+      aab: aab,
+      # A production release is always left as a draft for Andy to roll out
+      # in Play Console. A testing release goes live unless PLAY_RELEASE_STATUS
+      # says otherwise ("draft" is required while the app was never reviewed).
+      release_status: track == "production" ? "draft" : ENV.fetch("PLAY_RELEASE_STATUS", "completed"),
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+
+  # macOS's /usr/bin/keytool is a stub that needs a system Java; prefer the
+  # JDK Flutter builds with (JAVA_HOME, else Homebrew's openjdk@21).
+  def keytool_path
+    homes = [ENV["JAVA_HOME"], "/opt/homebrew/opt/openjdk@21"].compact
+    homes.map { |h| File.join(h, "bin/keytool") }.find { |k| File.executable?(k) } || "keytool"
+  end
+
+  # The highest versionCode on any track (0 when nothing was uploaded yet).
+  def highest_play_version_code
+    json_key = File.expand_path(ENV.fetch("PLAY_JSON_KEY"))
+    %w[internal alpha beta production].map do |t|
+      google_play_track_version_codes(package_name: PACKAGE_NAME, track: t, json_key: json_key).max.to_i
+    rescue StandardError => e
+      UI.message("Track #{t}: no version codes (#{e.message.lines.first&.strip})")
+      0
+    end.max
+  end
+end

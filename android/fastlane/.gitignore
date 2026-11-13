@@ -1,0 +1,6 @@
+# Secrets and fastlane output. The service-account key should live outside
+# the project anyway (PLAY_JSON_KEY); *.json catches a stray copy.
+.env
+*.json
+report.xml
+README.md

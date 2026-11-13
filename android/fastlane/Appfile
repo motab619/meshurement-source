@@ -1,0 +1,10 @@
+# Meshurement - maps LoRa mesh radio coverage.
+# Copyright (C) 2026 Andy Brunker (Plateau Nerd)
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Free software under the GNU GPL v3 or later, WITHOUT ANY WARRANTY; see LICENSE.
+
+# The Play application ID (never changes once the app exists on Play).
+package_name("com.plateaunerd.meshurement")
+# Service-account key from android/fastlane/.env (PLAY_JSON_KEY); the lanes
+# also pass it explicitly.
+json_key_file(File.expand_path(ENV["PLAY_JSON_KEY"])) if ENV["PLAY_JSON_KEY"]

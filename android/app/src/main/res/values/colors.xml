@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The splash navy: tool/splash_art.png's edges, iOS LaunchScreen
+         background, Flutter's SplashOverlay. -->
+    <color name="splash_background">#01011A</color>
+</resources>

@@ -1,0 +1,91 @@
+# Meshurement - maps LoRa mesh radio coverage.
+# Copyright (C) 2026 Andy Brunker (Plateau Nerd)
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Free software under the GNU GPL v3 or later, WITHOUT ANY WARRANTY; see LICENSE.
+#
+# Copy to bench.toml (git-ignored) and fill in your bench. `bench ports`
+# lists what is plugged in with the serial numbers used below.
+
+[bench]
+# Where reports and firmware downloads go (outside the repo).
+reports_dir = "/Volumes/MiniSlo/develop/mesh-bench/reports"
+firmware_cache = "/Volumes/MiniSlo/develop/mesh-bench/firmware"
+# LoRa region written to a freshly flashed Meshtastic radio.
+region = "US"
+
+# One table per radio. `serial` is the USB serial number from `bench ports`
+# (stable across re-plugs; /dev/cu.* names are not). `role` is what the app
+# should make of it; `protocol` is the firmware family currently flashed.
+[radios.base]
+serial = "0001"
+board = "heltec-v3"          # heltec-v3 | t1000-e | wio-tracker-l1
+protocol = "meshtastic"      # meshtastic | meshcore
+role = "base"
+
+[radios.mobile]
+serial = "REPLACE_ME"
+board = "t1000-e"
+protocol = "meshtastic"
+role = "mobile"
+
+# Optional third node on the test channel, never paired to the phone.
+# [radios.observer]
+# serial = "REPLACE_ME"
+# board = "wio-tracker-l1"
+# protocol = "meshtastic"
+# role = "observer"
+
+# Phones: one `[phones.<name>]` table each, in order; the first is the default
+# and `bench run --phone <name>` (or `--phone android`) picks another. A single
+# `[phone]` table still works and counts as the first. `bundle_id` defaults to
+# the app's id for the platform (iOS bundle id / Android application id).
+[phones.iphone]
+platform = "ios"             # android | ios
+id = "REPLACE_ME"            # iOS: devicectl UDID or name.
+
+[phones.android]
+platform = "android"
+id = "REPLACE_ME"            # Android: `adb devices` serial.
+
+# Firmware matrix for `bench matrix` (docs/design/bench-rig/README.md §6).
+# `combos` has one inline table per cell: `<radio name> = "<protocol> <version>"`
+# for each radio the cell pins (names from [radios.*]; protocol meshtastic |
+# meshcore; versions as `bench flash` takes them: 2.8.1, 2.8.1.8e6a88d,
+# 1.18.0, latest = newest stable, pre = newest incl. pre-releases). Per combo
+# the bench flashes only radios not already on that protocol + version
+# (from flashed.json, written by `bench flash`; `--reflash` forces), then runs
+# `scenarios` in order (a combo may override with its own `scenarios`). An
+# ESP32 (Heltec) flash drops the phone's Bluetooth bond: the run pauses for
+# "Forget This Device" on the phone (`--unattended` marks the combo blocked).
+# Report: matrix-<stamp>.md/.json + matrix-latest.json in reports_dir;
+# `--resume` skips combos the last report passed. `--dry-run` prints the plan.
+[matrix]
+scenarios = ["radio-setup", "remote-base-change"]
+combos = [
+  { base = "meshtastic 2.8.1", mobile = "meshtastic 2.7.26" },
+  { base = "meshtastic 2.8.1", mobile = "meshtastic 2.8.1" },
+  { base = "meshtastic latest", mobile = "meshtastic latest", scenarios = ["radio-setup"] },
+]
+
+# Phase 2: uhubctl hub port per device (hub location from `uhubctl`).
+# [hub]
+# location = "1-1"
+# ports = { base = 1, mobile = 2, observer = 3, phone = 4 }
+
+# Phase 3: programmable attenuator.
+# [attenuator]
+# kind = "rudat"             # rudat | null
+# fixed_pad_db = 30
+
+# More phones: `[phones.<name>]`, picked with `--phone <name>` (install,
+# launch, run); `[phone]` stays the default. `platform = "ios-sim"` is the
+# iOS simulator (tier T1, no radios): the app runs bench mode plus demo mode
+# (pretend radio, demo database), so only radio-free scenarios (`smoke`) apply.
+# Build it with `flutter build ios --simulator --debug --dart-define=BENCH=true`.
+# Optional per phone: demo = true (adds -MeshDemo; default for ios-sim),
+# demo_screen = "map", port = 8765. The simulator shares the Mac's loopback,
+# so give it a port no `iproxy`/`adb forward` to a phone is holding.
+[phones.sim]
+platform = "ios-sim"
+id = "iPhone 18 Pro Max"      # simulator name or UDID (`xcrun simctl list devices`)
+port = 8766

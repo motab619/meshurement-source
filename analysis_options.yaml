@@ -1,0 +1,12 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - lib/proto/**  # generated from upstream Meshtastic protobufs
+
+linter:
+  rules:
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    avoid_print: false  # We use print for dev logging in POC
+    use_key_in_widget_constructors: true

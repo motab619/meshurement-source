@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Meshurement - maps LoRa mesh radio coverage.
+     Copyright (C) 2026 Andy Brunker (Plateau Nerd)
+     SPDX-License-Identifier: GPL-3.0-or-later
+     Free software under the GNU GPL v3 or later, WITHOUT ANY WARRANTY; see LICENSE. -->
+<!-- Resources named only in Dart strings (looked up by name with
+     getIdentifier): the release resource shrinker (isShrinkResources) can't
+     see them and dropped ic_stat_notify, so flutter_local_notifications
+     (main.dart AndroidInitializationSettings) and geolocator's recording
+     notification (gps_service.dart) had no small icon in release builds.
+     Add any other drawable/raw referenced by name from Dart here. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_notify,@drawable/launch_image" />

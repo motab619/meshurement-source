@@ -1,0 +1,35 @@
+# Meshurement - maps LoRa mesh radio coverage.
+# Copyright (C) 2026 Andy Brunker (Plateau Nerd)
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Free software under the GNU GPL v3 or later, WITHOUT ANY WARRANTY; see LICENSE.
+
+[project]
+name = "meshurement-bench"
+version = "0.1.0"
+description = "Hardware-in-the-loop bench for Meshurement: radios over USB, phone over devicectl/adb"
+# The Meshtastic Python API needs Python <= 3.13 (CLAUDE.md, Bench).
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "meshtastic>=2.7",
+    "pyserial>=3.5",
+    "protobuf>=4",
+    "esptool>=5.6.0",
+    "adafruit-nrfutil>=0.5.3.post16",
+]
+
+[project.scripts]
+bench = "bench.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["bench"]
