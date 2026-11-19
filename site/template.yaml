@@ -6,7 +6,8 @@
 # Static site for meshurement.com plus the typo domain meshurment.com.
 # Deploy in us-east-1 (CloudFront certificates must live there): site/deploy.sh.
 # Plateau Nerd pattern: private S3 + CloudFront (OAC) + ACM (DNS-validated) + Route 53 aliases.
-# No WAF and no logging bucket, to keep the monthly cost near zero.
+# No WAF and no logging bucket of its own, to keep the monthly cost near zero. Standard logs go to
+# the shared Plateau Nerd client-site log bucket (400-day expiry) for the Ops dashboard's visitor counts.
 AWSTemplateFormatVersion: "2010-09-09"
 Description: meshurement.com static website (S3 + CloudFront + ACM + Route 53)
 
@@ -153,6 +154,10 @@ Resources:
         HttpVersion: http2and3
         IPV6Enabled: true
         PriceClass: PriceClass_100
+        Logging:
+          Bucket: !Sub "pn-client-site-logs-${AWS::AccountId}.s3.amazonaws.com"
+          Prefix: meshurement/
+          IncludeCookies: false
         ViewerCertificate:
           AcmCertificateArn: !Ref SiteCertificate
           SslSupportMethod: sni-only
